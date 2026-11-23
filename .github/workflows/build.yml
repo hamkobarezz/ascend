@@ -23,7 +23,9 @@ jobs:
           - os: windows-latest
             script: dist:win
             files: dist/*.exe
-          - os: macos-latest
+          # Intel Mac runners: Apple-silicon (macos-latest) runners often sit unassigned for lack of
+          # capacity. The .dmg is still universal (Apple silicon + Intel).
+          - os: macos-15-intel
             script: dist:mac
             files: dist/*.dmg
     runs-on: ${{ matrix.os }}
@@ -45,9 +47,9 @@ jobs:
           fi
           echo "$CERT" | base64 --decode > tools/zxpsign/ascend-cert.p12
 
-      # Adobe's macOS ZXPSignCmd is Intel-only; GitHub's Mac runners are Apple silicon.
-      - name: Install Rosetta (macOS)
-        if: runner.os == 'macOS'
+      # Adobe's macOS ZXPSignCmd is Intel-only; only needed if this ever runs on an Apple-silicon runner.
+      - name: Install Rosetta (Apple-silicon macOS)
+        if: runner.os == 'macOS' && runner.arch == 'ARM64'
         run: /usr/sbin/softwareupdate --install-rosetta --agree-to-license || true
 
       - run: npm ci
@@ -60,10 +62,11 @@ jobs:
           name: Ascend-${{ matrix.os }}
           path: ${{ matrix.files }}
 
-  # A version tag (v0.3.0, ...) publishes both installers as a GitHub Release.
+  # A version tag (v0.3.0, ...) publishes the installers as a GitHub Release. It publishes whatever
+  # built, so one stuck platform doesn't hold back the other; re-running that build adds its file.
   release:
     needs: build
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: always() && startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -91,4 +94,12 @@ jobs:
 
           The app isn't code-signed yet: on Windows choose **More info → Run anyway**, on macOS right-click the app and choose **Open** the first time.
           NOTES
-          gh release create "$GITHUB_REF_NAME" out/* --repo "$GITHUB_REPOSITORY" --title "Ascend ${GITHUB_REF_NAME#v}" --notes-file notes.md
+          if [ -z "$(ls -A out 2>/dev/null)" ]; then
+            echo "::error::No installers were built."
+            exit 1
+          fi
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" out/* --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" out/* --repo "$GITHUB_REPOSITORY" --title "Ascend ${GITHUB_REF_NAME#v}" --notes-file notes.md
+          fi

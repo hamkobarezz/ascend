@@ -2,14 +2,14 @@
 <!-- Ascend CEP extension bundle: one panel for After Effects, one for Illustrator.
      Packaged and signed as dist-plugins/ascend.zxp by scripts/build-zxp.js; the Ascend app
      installs it through Adobe's installer (UPIA). Keep ExtensionBundleVersion in sync with package.json. -->
-<ExtensionManifest Version="7.0" ExtensionBundleId="com.hamkobarezz.ascend" ExtensionBundleVersion="0.3.1" ExtensionBundleName="Ascend"
+<ExtensionManifest Version="7.0" ExtensionBundleId="com.hamkobarezz.ascend" ExtensionBundleVersion="0.3.2" ExtensionBundleName="Ascend"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <Author><![CDATA[Hamko Barez]]></Author>
   <Legal href="https://hamkobarezz.com"><![CDATA[© Hamko Barez]]></Legal>
   <Abstract href="https://hamkobarezz.com"><![CDATA[Send layers from Illustrator, Photoshop and Figma to After Effects as native, editable layers.]]></Abstract>
   <ExtensionList>
-    <Extension Id="com.hamkobarezz.ascend.ae" Version="0.3.1" />
-    <Extension Id="com.hamkobarezz.ascend.ai" Version="0.3.1" />
+    <Extension Id="com.hamkobarezz.ascend.ae" Version="0.3.2" />
+    <Extension Id="com.hamkobarezz.ascend.ai" Version="0.3.2" />
   </ExtensionList>
   <ExecutionEnvironment>
     <HostList>

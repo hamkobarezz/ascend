@@ -5,7 +5,7 @@
 // host scripts never need AE's "Allow Scripts to Write Files and Access Network" setting.
 (() => {
   const APP = 'http://127.0.0.1:7777'; // the Ascend desktop app (fixed local port)
-  const VERSION = '0.3.1';
+  const VERSION = '0.3.2';
   const $ = (id) => document.getElementById(id);
   const cep = window.__adobe_cep__;
   const nodeRequire = typeof require === 'function' ? require : window.cep_node && window.cep_node.require;
