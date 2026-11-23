@@ -4,7 +4,24 @@
 // possible), text stays live text, groups become nulls, clipping masks become track mattes,
 // and everything else is exported as a trimmed PNG.
 
-const RELAY = 'http://localhost:7777'; // the Ascend desktop app
+// The Ascend app listens on the first free port from 7777 to 7781; remember the one that answers.
+const PORTS = [7777, 7778, 7779, 7780, 7781];
+let appBase = null;
+const withTimeout = (p, ms) => Promise.race([p, new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms))]);
+async function findApp() {
+  const tries = [appBase].concat(PORTS.map((p) => 'http://localhost:' + p)).filter((u, i, a) => u && a.indexOf(u) === i);
+  for (const base of tries) {
+    try {
+      const s = await withTimeout(fetch(base + '/status').then((r) => r.json()), 1500);
+      if (s && s.app === 'hb-bridge') {
+        appBase = base;
+        return { base, status: s };
+      }
+    } catch (e) {}
+  }
+  appBase = null;
+  throw new Error("Ascend isn't running");
+}
 const VERSION = '0.3.0';
 
 let ps = null;
@@ -432,13 +449,17 @@ async function shape(layer, d, adj, ctx, parentOp, op, fillOp, scope) {
       const join = { strokeStyleRoundJoin: 'ROUND', strokeStyleBevelJoin: 'BEVEL' }[st.strokeStyleLineJoinType && st.strokeStyleLineJoinType._value] || 'MITER';
       const sop = st.strokeStyleOpacity ? px(st.strokeStyleOpacity, ctx.res) / 100 : 1;
       stroke = Object.assign(c, { a: round(sop * fillOp), width: round(width), align, cap, join });
-      if (Array.isArray(st.strokeStyleLineDashSet) && st.strokeStyleLineDashSet.length) {
-        ctx.warnings.push(`"${layer.name}": dashed strokes come through solid.`);
+      // Photoshop stores dash and gap lengths as multiples of the stroke width.
+      const dashSet = st.strokeStyleLineDashSet;
+      if (Array.isArray(dashSet) && dashSet.length) {
+        const unit = (v) => round((typeof v === 'number' ? v : (v && v._value) || 0) * width);
+        stroke.dashes = dashSet.map(unit);
+        if (st.strokeStyleLineDashOffset) stroke.dashOffset = unit(st.strokeStyleLineDashOffset);
       }
     }
   }
   if (!fills.length && !stroke) return;
-  add(ctx, Object.assign(base, { x, y, w, h, geom, fills, stroke }), scope);
+  add(ctx, Object.assign(base, { x, y, w, h, geom, fills, strokes: stroke ? [stroke] : [], stroke }), scope);
 }
 
 async function text(layer, d, ctx, parentOp, contentOp, scope) {
@@ -649,8 +670,7 @@ if (ps && typeof document !== 'undefined') {
   // "ASCEND APP" light in the header: is the desktop app running?
   const ping = async () => {
     try {
-      const r = await fetch(RELAY + '/status');
-      await r.json();
+      await findApp();
       $('relay').className = 'row chip mono on';
       $('relayText').textContent = 'APP ONLINE';
     } catch (e) {
@@ -662,7 +682,8 @@ if (ps && typeof document !== 'undefined') {
   setInterval(ping, 3000);
 
   const push = async (json) => {
-    const res = await fetch(RELAY + '/push', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: json });
+    const { base } = await findApp();
+    const res = await fetch(base + '/push', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: json });
     const body = await res.json();
     if (!res.ok || !body.ok) throw new Error(body.error || 'HTTP ' + res.status);
   };

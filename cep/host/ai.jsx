@@ -174,8 +174,13 @@
             if (strokeCol) {
                 var cap = style.strokeCap == StrokeCap.ROUNDENDCAP ? "ROUND" : style.strokeCap == StrokeCap.PROJECTINGENDCAP ? "SQUARE" : "NONE";
                 var join = style.strokeJoin == StrokeJoin.ROUNDENDJOIN ? "ROUND" : style.strokeJoin == StrokeJoin.BEVELENDJOIN ? "BEVEL" : "MITER";
-                stroke = { r: strokeCol.r, g: strokeCol.g, b: strokeCol.b, a: 1, width: style.strokeWidth, align: "CENTER", cap: cap, join: join };
-                if (style.strokeDashes && style.strokeDashes.length) ctx.warnings.push('"' + itemName(item, "path") + '": dashed strokes come through solid.');
+                stroke = { r: strokeCol.r, g: strokeCol.g, b: strokeCol.b, a: 1, width: style.strokeWidth, align: "CENTER", cap: cap, join: join, miter: style.strokeMiterLimit };
+                var dashes = style.strokeDashes;
+                if (dashes && dashes.length) {
+                    stroke.dashes = [];
+                    for (var dk = 0; dk < dashes.length; dk++) stroke.dashes.push(dashes[dk]);
+                    if (style.strokeDashOffset) stroke.dashOffset = style.strokeDashOffset;
+                }
             }
             add({
                 type: "shape", id: nextId("p"), name: itemName(item, item.typename === "CompoundPathItem" ? "Compound path" : "Path"),
@@ -184,6 +189,7 @@
                 x: cx, y: cy, rotation: 0, w: gb[2] - gb[0], h: gb[1] - gb[3],
                 geom: { kind: "path", detect: true, evenOdd: !!style.evenodd, paths: list },
                 fills: fill ? [{ r: fill.r, g: fill.g, b: fill.b, a: 1 }] : [],
+                strokes: stroke ? [stroke] : [],
                 stroke: stroke
             }, scope);
         }

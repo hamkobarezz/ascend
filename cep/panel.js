@@ -4,7 +4,24 @@
 // The panel does the networking (fetch to the local app) and file writing (CEP's Node.js), so the
 // host scripts never need AE's "Allow Scripts to Write Files and Access Network" setting.
 (() => {
-  const APP = 'http://127.0.0.1:7777'; // the Ascend desktop app (fixed local port)
+  // The Ascend app listens on the first free port from 7777 to 7781; remember the one that answers.
+  const PORTS = [7777, 7778, 7779, 7780, 7781];
+  let appBase = null;
+  const withTimeout = (p, ms) => Promise.race([p, new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms))]);
+  async function findApp() {
+    const tries = [appBase].concat(PORTS.map((p) => 'http://127.0.0.1:' + p)).filter((u, i, a) => u && a.indexOf(u) === i);
+    for (const base of tries) {
+      try {
+        const s = await withTimeout(fetch(base + '/status', { cache: 'no-store' }).then((r) => r.json()), 1500);
+        if (s && s.app === 'hb-bridge') {
+          appBase = base;
+          return { base, status: s };
+        }
+      } catch (e) {}
+    }
+    appBase = null;
+    throw new Error("Ascend isn't running");
+  }
   const VERSION = '0.3.0';
   const $ = (id) => document.getElementById(id);
   const cep = window.__adobe_cep__;
@@ -28,7 +45,8 @@
     });
   }
   async function app(pathname, opts) {
-    const res = await fetch(APP + pathname, opts);
+    const { base } = await findApp();
+    const res = await fetch(base + pathname, opts);
     const body = await res.text();
     let json = null;
     try { json = JSON.parse(body); } catch (e) {}

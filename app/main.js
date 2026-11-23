@@ -4,7 +4,7 @@
 const { app, BrowserWindow, Tray, Menu, ipcMain, shell, nativeImage } = require('electron');
 const fs = require('fs');
 const path = require('path');
-const { createRelay, DEFAULT_PORT } = require('../relay/server');
+const { createRelay, DEFAULT_PORT, PORTS } = require('../relay/server');
 const installers = require('./installers');
 
 const VERSION = app.getVersion();
@@ -64,28 +64,38 @@ function resources() {
 let relay = null;
 let relayState = { running: false, port: DEFAULT_PORT, error: null };
 
+// Takes the first free port from PORTS (7777 first); the plugins search the same range.
 async function startRelay() {
-  relay = createRelay({
-    port: DEFAULT_PORT,
-    version: VERSION,
-    log: () => {},
-    onEvent: (ev) => {
-      settings.last = ev;
-      saveSettings();
-      send('event', ev);
-      updateTray();
-    },
-  });
-  try {
-    await relay.start();
-    relayState = { running: true, port: DEFAULT_PORT, error: null };
-  } catch (e) {
-    relayState = {
-      running: false,
-      port: DEFAULT_PORT,
-      error: e.code === 'EADDRINUSE' ? `Port ${DEFAULT_PORT} is already in use. Close any other Ascend or "node relay/server.js" window, then restart.` : e.message,
-    };
+  let lastError = null;
+  for (const port of PORTS) {
+    relay = createRelay({
+      port,
+      version: VERSION,
+      log: () => {},
+      onEvent: (ev) => {
+        settings.last = ev;
+        saveSettings();
+        send('event', ev);
+        updateTray();
+      },
+    });
+    try {
+      await relay.start();
+      relayState = { running: true, port, error: null };
+      return;
+    } catch (e) {
+      lastError = e;
+      if (e.code !== 'EADDRINUSE') break;
+    }
   }
+  relayState = {
+    running: false,
+    port: DEFAULT_PORT,
+    error:
+      lastError && lastError.code === 'EADDRINUSE'
+        ? `Ports ${PORTS[0]}–${PORTS[PORTS.length - 1]} are all in use. Close any other Ascend window, then restart.`
+        : (lastError && lastError.message) || 'The relay could not start.',
+  };
 }
 
 // ---------------------------------------------------------------- window + tray

@@ -230,28 +230,21 @@
 
     // ------------------------------------------------------------ layer builders
 
-    function makeShape(comp, L) {
-        var layer = comp.layers.addShape();
-        var grp = layer.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group");
-        grp.name = L.name;
-        var vecs = grp.property("ADBE Vectors Group");
-        var g = detectPrimitive(L.geom) || L.geom;
-        var st = L.stroke, adj = 0, k;
-        var fills = L.fills || [];
-        if (L.matteSource && !fills.length) fills = [{ r: 1, g: 1, b: 1, a: 1 }]; // a mask needs alpha
+    // Payload v3 sends L.strokes (top-most first); older payloads send a single L.stroke.
+    function strokeList(L) {
+        if (L.strokes instanceof Array) return L.strokes;
+        return L.stroke ? [L.stroke] : [];
+    }
 
-        if (st && (g.kind === "rect" || g.kind === "ellipse")) {
-            if (st.align === "INSIDE") adj = -st.width;
-            else if (st.align === "OUTSIDE") adj = st.width;
-        }
-
+    function addGeometry(vecs, g) {
+        var k;
         if (g.kind === "rect") {
             var r = vecs.addProperty("ADBE Vector Shape - Rect");
-            r.property("ADBE Vector Rect Size").setValue([Math.max(0, g.w + adj), Math.max(0, g.h + adj)]);
-            r.property("ADBE Vector Rect Roundness").setValue(Math.max(0, (g.radius || 0) + adj / 2));
+            r.property("ADBE Vector Rect Size").setValue([Math.max(0, g.w), Math.max(0, g.h)]);
+            r.property("ADBE Vector Rect Roundness").setValue(Math.max(0, g.radius || 0));
         } else if (g.kind === "ellipse") {
             var el = vecs.addProperty("ADBE Vector Shape - Ellipse");
-            el.property("ADBE Vector Ellipse Size").setValue([Math.max(0, g.w + adj), Math.max(0, g.h + adj)]);
+            el.property("ADBE Vector Ellipse Size").setValue([Math.max(0, g.w), Math.max(0, g.h)]);
         } else {
             for (k = 0; k < g.paths.length; k++) {
                 var p = g.paths[k];
@@ -263,18 +256,80 @@
                 vecs.addProperty("ADBE Vector Shape - Group").property("ADBE Vector Shape").setValue(sh);
             }
         }
+    }
 
-        // Items higher in the group render on top: stroke first, then fills top-most first.
-        if (st && !L.matteSource) {
-            var s = vecs.addProperty("ADBE Vector Graphic - Stroke");
-            s.property("ADBE Vector Stroke Color").setValue(rgb(st));
-            s.property("ADBE Vector Stroke Opacity").setValue(st.a * 100);
-            s.property("ADBE Vector Stroke Width").setValue(st.width);
-            var cap = { ROUND: 2, SQUARE: 3 }[st.cap];
-            if (cap) s.property("ADBE Vector Stroke Line Cap").setValue(cap);
-            var join = { ROUND: 2, BEVEL: 3 }[st.join];
-            if (join) s.property("ADBE Vector Stroke Line Join").setValue(join);
+    function isClosed(g) {
+        if (g.kind !== "path") return true;
+        for (var k = 0; k < g.paths.length; k++) if (!g.paths[k].c) return false;
+        return true;
+    }
+
+    var CAPS = { ROUND: 2, SQUARE: 3 }, JOINS = { ROUND: 2, BEVEL: 3 };
+
+    // Native AE dashes: up to three dash/gap pairs plus an offset. An odd-length pattern repeats
+    // once to become even (the SVG / Figma / Illustrator rule).
+    function addDashes(s, st, ctx, name) {
+        var d = st.dashes;
+        if (!(d instanceof Array) || !d.length) return;
+        var arr = d.length % 2 ? d.concat(d) : d.slice(0);
+        if (arr.length > 6) ctx.warn(name + ": dash pattern has more than 3 dash/gap pairs; AE keeps the first 3.");
+        var grp = s.property("ADBE Vector Stroke Dashes");
+        for (var i = 0; i < Math.min(arr.length, 6); i += 2) {
+            grp.addProperty("ADBE Vector Stroke Dash " + (i / 2 + 1)).setValue(Math.max(0, arr[i]));
+            grp.addProperty("ADBE Vector Stroke Gap " + (i / 2 + 1)).setValue(Math.max(0, arr[i + 1]));
         }
+        if (st.dashOffset) grp.addProperty("ADBE Vector Stroke Offset").setValue(st.dashOffset);
+    }
+
+    function addStroke(vecs, st, ctx, name) {
+        var s = vecs.addProperty("ADBE Vector Graphic - Stroke");
+        s.property("ADBE Vector Stroke Color").setValue(rgb(st));
+        s.property("ADBE Vector Stroke Opacity").setValue((st.a === undefined ? 1 : st.a) * 100);
+        s.property("ADBE Vector Stroke Width").setValue(st.width);
+        if (CAPS[st.cap]) s.property("ADBE Vector Stroke Line Cap").setValue(CAPS[st.cap]);
+        if (JOINS[st.join]) s.property("ADBE Vector Stroke Line Join").setValue(JOINS[st.join]);
+        if (st.miter) s.property("ADBE Vector Stroke Miter Limit").setValue(st.miter);
+        addDashes(s, st, ctx, name);
+        return s;
+    }
+
+    function makeShape(comp, L, ctx) {
+        var layer = comp.layers.addShape();
+        var root = layer.property("ADBE Root Vectors Group");
+        var g = detectPrimitive(L.geom) || L.geom;
+        var strokes = L.matteSource ? [] : strokeList(L);
+        var fills = L.fills || [];
+        var k, s;
+        if (L.matteSource && !fills.length) fills = [{ r: 1, g: 1, b: 1, a: 1 }]; // a mask needs alpha
+
+        // AE has no stroke alignment, so an inside / outside stroke gets its own group: a copy of the
+        // geometry, Offset Paths by half the width, then the stroke. Fills and the editable rect /
+        // ellipse stay exactly as designed. Groups higher in the list render on top.
+        var aligned = false, closed = isClosed(g);
+        for (k = 0; k < strokes.length; k++) if (closed && strokes[k].align && strokes[k].align !== "CENTER") aligned = true;
+
+        if (aligned) {
+            for (k = 0; k < strokes.length; k++) {
+                s = strokes[k];
+                var sg = root.addProperty("ADBE Vector Group");
+                sg.name = strokes.length > 1 ? "Stroke " + (k + 1) : "Stroke";
+                var sv = sg.property("ADBE Vectors Group");
+                addGeometry(sv, g);
+                if (s.align === "INSIDE" || s.align === "OUTSIDE") {
+                    var off = sv.addProperty("ADBE Vector Filter - Offset");
+                    off.property("ADBE Vector Offset Amount").setValue((s.align === "INSIDE" ? -1 : 1) * s.width / 2);
+                    off.property("ADBE Vector Offset Line Join").setValue(JOINS[s.join] || 1);
+                }
+                addStroke(sv, s, ctx, L.name);
+            }
+        }
+
+        var grp = root.addProperty("ADBE Vector Group");
+        grp.name = L.name;
+        var vecs = grp.property("ADBE Vectors Group");
+        addGeometry(vecs, g);
+        // Items higher in the group render on top: strokes first (top-most first), then fills.
+        if (!aligned) for (k = 0; k < strokes.length; k++) addStroke(vecs, strokes[k], ctx, L.name);
         for (k = 0; k < fills.length; k++) {
             var f = vecs.addProperty("ADBE Vector Graphic - Fill");
             f.property("ADBE Vector Fill Color").setValue(rgb(fills[k]));
@@ -441,7 +496,7 @@
                 L = data.layers[i];
                 try {
                     var layer = null;
-                    if (L.type === "shape") layer = makeShape(comp, L);
+                    if (L.type === "shape") layer = makeShape(comp, L, ctx);
                     else if (L.type === "text") layer = makeText(comp, L, ctx);
                     else if (L.type === "image") layer = makeImage(comp, L, ctx);
                     if (layer) {

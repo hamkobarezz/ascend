@@ -155,7 +155,24 @@
 <div class="foot"><span>ASCEND · V0.3</span><span>HAMKOBAREZZ.COM</span></div>
 
 <script>
-  const RELAY = 'http://localhost:7777'; // the Ascend desktop app
+  // The Ascend app listens on the first free port from 7777 to 7781; remember the one that answers.
+  const PORTS = [7777, 7778, 7779, 7780, 7781];
+  let appBase = null;
+  const withTimeout = (p, ms) => Promise.race([p, new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms))]);
+  async function findApp() {
+    const tries = [appBase].concat(PORTS.map((p) => 'http://localhost:' + p)).filter((u, i, a) => u && a.indexOf(u) === i);
+    for (const base of tries) {
+      try {
+        const s = await withTimeout(fetch(base + '/status', { cache: 'no-store' }).then((r) => r.json()), 1500);
+        if (s && s.app === 'hb-bridge') {
+          appBase = base;
+          return { base, status: s };
+        }
+      } catch (e) {}
+    }
+    appBase = null;
+    throw new Error("Ascend isn't running");
+  }
   const $ = (id) => document.getElementById(id);
   let busy = false;
   let count = 0;
@@ -202,8 +219,7 @@
   // relay light
   async function ping() {
     try {
-      const r = await fetch(RELAY + '/status', { cache: 'no-store' });
-      const s = await r.json();
+      const { status: s } = await findApp();
       $('relay').classList.add('on');
       $('relay').title = s.has ? `Waiting for After Effects: ${s.source} · ${s.name}` : 'Ascend app is running';
       $('relay').querySelector('span').textContent = 'APP ONLINE';
@@ -248,7 +264,8 @@
     showWarnings(m.warnings);
     status('Sending ' + summary + '…', 'busy');
     try {
-      const res = await fetch(RELAY + '/push', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: m.json });
+      const { base } = await findApp();
+      const res = await fetch(base + '/push', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: m.json });
       const body = await res.json();
       if (!res.ok || !body.ok) throw new Error(body.error || 'HTTP ' + res.status);
       status('Sent ' + summary + '. Click Pull in After Effects.', 'ok');

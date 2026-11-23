@@ -160,7 +160,10 @@ function createRelay({ port = DEFAULT_PORT, host = '127.0.0.1', version = '', lo
   };
 }
 
-module.exports = { createRelay, DEFAULT_PORT };
+// The app takes the first free port in this range; the plugins look for it in the same range.
+const PORTS = [7777, 7778, 7779, 7780, 7781];
+
+module.exports = { createRelay, DEFAULT_PORT, PORTS };
 
 if (require.main === module) {
   const port = Number(process.env.PORT) || DEFAULT_PORT;

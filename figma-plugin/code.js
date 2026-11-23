@@ -233,26 +233,19 @@ async function emitShape(node, ctx, parentOp, geom, scope, as) {
   }
   const fills = solidPaints(node.fills).reverse(); // AE wants top-most first
   const strokes = solidPaints(node.strokes);
-  const top = strokes[strokes.length - 1];
   const weight = typeof node.strokeWeight === 'number' ? node.strokeWeight : node.strokeTopWeight || 1;
-  const stroke =
-    top && weight > 0
-      ? Object.assign({}, top, {
-          width: weight,
-          align: node.strokeAlign || 'CENTER',
-          cap: typeof node.strokeCap === 'string' ? node.strokeCap : 'NONE',
-          join: typeof node.strokeJoin === 'string' ? node.strokeJoin : 'MITER',
-        })
-      : null;
-  if (!fills.length && !stroke && !scope.matteSource) return;
-
-  if (strokes.length > 1) ctx.warnings.push(`"${node.name}": only the top stroke is transferred.`);
-  if (Array.isArray(node.dashPattern) && node.dashPattern.length) {
-    ctx.warnings.push(`"${node.name}": dashed strokes come through solid.`);
-  }
-  if (stroke && geom.kind === 'path' && stroke.align !== 'CENTER') {
-    ctx.warnings.push(`"${node.name}": ${stroke.align.toLowerCase()} stroke on a path is drawn centered.`);
-  }
+  // Every visible stroke, top-most first, each with the node's weight, alignment, caps and dashes.
+  const style = {
+    width: weight,
+    align: node.strokeAlign || 'CENTER',
+    cap: typeof node.strokeCap === 'string' ? node.strokeCap : 'NONE',
+    join: typeof node.strokeJoin === 'string' ? node.strokeJoin : 'MITER',
+  };
+  if (typeof node.strokeMiterLimit === 'number') style.miter = node.strokeMiterLimit;
+  if (Array.isArray(node.dashPattern) && node.dashPattern.length) style.dashes = node.dashPattern.map(round);
+  const strokeList = weight > 0 ? strokes.map((p) => Object.assign({}, p, style)).reverse() : [];
+  const stroke = strokeList[0] || null; // older After Effects panels read only this one
+  if (!fills.length && !strokeList.length && !scope.matteSource) return;
 
   const t = xform(node, ctx.toRoot);
   addLayer(
@@ -271,6 +264,7 @@ async function emitShape(node, ctx, parentOp, geom, scope, as) {
       h: round(node.height),
       geom,
       fills,
+      strokes: strokeList,
       stroke,
     },
     scope
