@@ -288,8 +288,11 @@
         s.property("ADBE Vector Stroke Width").setValue(st.width);
         if (CAPS[st.cap]) s.property("ADBE Vector Stroke Line Cap").setValue(CAPS[st.cap]);
         if (JOINS[st.join]) s.property("ADBE Vector Stroke Line Join").setValue(JOINS[st.join]);
-        if (st.miter) s.property("ADBE Vector Stroke Miter Limit").setValue(st.miter);
-        addDashes(s, st, ctx, name);
+        // Extras are applied separately: if After Effects rejects one, the stroke still builds.
+        if (st.miter) {
+            try { s.property("ADBE Vector Stroke Miter Limit").setValue(st.miter); } catch (e) {}
+        }
+        try { addDashes(s, st, ctx, name); } catch (e) { ctx.warn(name + ": dashes couldn't be applied (" + e.message + ")."); }
         return s;
     }
 
@@ -316,9 +319,13 @@
                 var sv = sg.property("ADBE Vectors Group");
                 addGeometry(sv, g);
                 if (s.align === "INSIDE" || s.align === "OUTSIDE") {
-                    var off = sv.addProperty("ADBE Vector Filter - Offset");
-                    off.property("ADBE Vector Offset Amount").setValue((s.align === "INSIDE" ? -1 : 1) * s.width / 2);
-                    off.property("ADBE Vector Offset Line Join").setValue(JOINS[s.join] || 1);
+                    try {
+                        var off = sv.addProperty("ADBE Vector Filter - Offset");
+                        off.property("ADBE Vector Offset Amount").setValue((s.align === "INSIDE" ? -1 : 1) * s.width / 2);
+                        off.property("ADBE Vector Offset Line Join").setValue(JOINS[s.join] || 1);
+                    } catch (e) {
+                        ctx.warn(L.name + ": " + s.align.toLowerCase() + " stroke drawn centered (" + e.message + ").");
+                    }
                 }
                 addStroke(sv, s, ctx, L.name);
             }
@@ -625,9 +632,11 @@
 
     G.AscendAE = {
         // Where pulled PNGs go: ./Ascend next to the saved project, or a folder the user picks.
-        assetDir: function () {
+        // noDialog (auto-pull): an unsaved project uses Documents/Ascend/Unsaved project instead of asking.
+        assetDir: function (noDialog) {
             return call(function () {
                 if (app.project.file) return { ok: true, dir: app.project.file.parent.fsName + "/Ascend" };
+                if (noDialog) return { ok: true, dir: Folder.myDocuments.fsName + "/Ascend/Unsaved project" };
                 var f = Folder.selectDialog("Save the project first, or choose a folder for Ascend's images.");
                 return f ? { ok: true, dir: f.fsName } : { ok: false, cancelled: true, error: "No image folder chosen." };
             });

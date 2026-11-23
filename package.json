@@ -1,7 +1,7 @@
 {
   "name": "hb-bridge",
   "productName": "Ascend",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Ascend: send layers from Figma, Photoshop and Illustrator to After Effects as native, editable layers.",
   "author": "Hamko Barez",
   "homepage": "https://hamkobarezz.com",

@@ -22,7 +22,7 @@
     appBase = null;
     throw new Error("Ascend isn't running");
   }
-  const VERSION = '0.3.0';
+  const VERSION = '0.4.0';
   const $ = (id) => document.getElementById(id);
   const cep = window.__adobe_cep__;
   const nodeRequire = typeof require === 'function' ? require : window.cep_node && window.cep_node.require;
@@ -129,19 +129,19 @@
       $('aeMeta').textContent = 'From Illustrator, Photoshop or Figma';
     } else {
       const [cls, label] = SOURCE[String(relay.source || '').toLowerCase()] || ['none', '?'];
-      $('aeStep').textContent = 'Waiting in Ascend';
-      $('aeStep').className = 'step';
+      $('aeStep').textContent = relay.pulled ? 'Last sent' : isOn('optAuto') ? 'Arriving' : 'Waiting in Ascend';
+      $('aeStep').className = relay.pulled ? 'step quiet' : 'step';
       ico.className = 'ico ' + cls; ico.textContent = label;
       $('aeName').textContent = relay.name || 'Untitled';
       const what = relay.kind === 'comps' ? plural(relay.comps, 'comp') : plural(relay.layers, 'layer');
-      $('aeMeta').textContent = `${relay.source} · ${what}${relay.at ? ' · ' + ago(relay.at) : ''}`;
+      $('aeMeta').textContent = `${relay.source} · ${what}${relay.at ? ' · ' + ago(relay.at) : ''}${relay.pulled ? ' · in AE' : ''}`;
     }
     const pull = $('pull');
     if (!pulling) {
       pull.disabled = !has;
-      $('pullText').textContent = has && relay.kind === 'comps' ? `Make ${plural(relay.comps, 'comp')}` : 'Pull into After Effects';
+      $('pullText').textContent = has && relay.pulled ? 'Pull again' : has && relay.kind === 'comps' ? `Make ${plural(relay.comps, 'comp')}` : 'Pull into After Effects';
     }
-    $('hint').textContent = has ? 'Ready to pull' : 'Ascend';
+    $('hint').textContent = isOn('optAuto') ? 'Auto-pull on' : has && !relay.pulled ? 'Ready to pull' : 'Ascend';
   }
 
   async function refreshAEInfo() {
@@ -152,7 +152,10 @@
     $('optActiveSub').textContent = info.comp ? 'Builds into “' + info.comp + '”' : 'No comp open, makes a new one';
   }
 
-  async function pull() {
+  // auto: started by a new send (see maybeAutoPull). It never opens a folder dialog, claims the
+  // payload once (the app refuses a second auto-pull) and stays quiet if someone else got it first.
+  async function pull(auto) {
+    auto = auto === true;
     if (pulling) return;
     pulling = true;
     const btn = $('pull');
@@ -162,14 +165,16 @@
     try {
       const st = (await app('/status').catch(() => { throw new Error(OFFLINE); })).json;
       if (!st.has) throw new Error('Nothing waiting. Send from Illustrator, Photoshop or Figma first.');
+      if (auto && st.pulled) return;
       let dir = '';
       if (st.images > 0) {
-        const r = await evalHost('AscendAE.assetDir');
+        const r = await evalHost('AscendAE.assetDir', auto);
         if (!r.ok) throw new Error(r.error);
         dir = r.dir;
         fs.mkdirSync(dir, { recursive: true });
       }
-      const { body } = await app('/pull' + (dir ? '?dir=' + encodeURIComponent(dir) : ''));
+      const query = [dir ? 'dir=' + encodeURIComponent(dir) : '', auto ? 'auto=1' : ''].filter(Boolean).join('&');
+      const { body } = await app('/pull' + (query ? '?' + query : ''));
       const file = path.join(os.tmpdir(), 'ascend-pull.json');
       fs.writeFileSync(file, body, 'utf8');
       $('pullText').innerHTML = '<span class="dots">Building</span>';
@@ -182,13 +187,22 @@
         toast(`Built ${plural(res.count, 'layer')} in “${res.comp}”.` + (notes.length ? ` ${plural(notes.length, 'note')}: ${notes.slice(0, 3).join(' · ')}` : ''), !(res.errors && res.errors.length));
       }
     } catch (e) {
-      toast(e.message || String(e), false);
+      if (!(auto && /already pulled/i.test(e.message || ''))) toast(e.message || String(e), false);
     } finally {
       pulling = false;
       btn.classList.remove('busy');
       await pollRelay();
       renderAE();
     }
+  }
+
+  // Something new arrived and nobody has pulled it yet: build it right away. Only recent sends,
+  // so opening After Effects hours later doesn't drop an old payload into the open comp.
+  const AUTO_MAX_AGE = 10 * 60 * 1000;
+  function maybeAutoPull() {
+    if (!isOn('optAuto') || pulling || !relay || !relay.has || relay.pulled) return;
+    if (relay.at && Date.now() - relay.at > AUTO_MAX_AGE) return;
+    pull(true);
   }
 
   // ---------------------------------------------------------------- Illustrator
@@ -245,8 +259,8 @@
       if (kind !== 'comps') $('sendText').innerHTML = '<span class="dots">Sending</span>';
       const body = fs.readFileSync(res.file, 'utf8');
       await app('/push', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body });
-      if (kind === 'comps') toast(`Sent ${plural(res.comps.length, 'comp')}. Click Pull in After Effects.`, true);
-      else toast(`Sent ${plural(res.layers, 'layer')} (${res.width}×${res.height}). Click Pull in After Effects.` + (res.warnings && res.warnings.length ? ` ${plural(res.warnings.length, 'note')}: ${res.warnings.slice(0, 2).join(' · ')}` : ''), true);
+      if (kind === 'comps') toast(`Sent ${plural(res.comps.length, 'comp')} to After Effects.`, true);
+      else toast(`Sent ${plural(res.layers, 'layer')} (${res.width}×${res.height}) to After Effects.` + (res.warnings && res.warnings.length ? ` ${plural(res.warnings.length, 'note')}: ${res.warnings.slice(0, 2).join(' · ')}` : ''), true);
     } catch (e) {
       toast(e.message || String(e), false);
     } finally {
@@ -266,6 +280,7 @@
     if (IS_AE) {
       await refreshAEInfo();
       renderAE();
+      maybeAutoPull();
     } else {
       if (!sending) await refreshAIInfo();
       renderAI();
@@ -274,7 +289,15 @@
 
   if (IS_AE) {
     $('ae').hidden = false;
-    $('pull').onclick = pull;
+    $('pull').onclick = () => pull(false);
+    // Auto-pull is on unless the user turned it off (remembered per machine).
+    const auto = localStorage.getItem('ascend.autoPull') !== 'off';
+    $('optAuto').classList.toggle('on', auto);
+    $('optAuto').setAttribute('aria-checked', String(auto));
+    switchOpt($('optAuto'), () => {
+      localStorage.setItem('ascend.autoPull', isOn('optAuto') ? 'on' : 'off');
+      renderAE();
+    });
     switchOpt($('optActive'));
     switchOpt($('optGroups'));
   } else {
@@ -291,6 +314,6 @@
     });
   }
   tick();
-  setInterval(() => !pulling && !sending && tick(), 2000);
+  setInterval(() => !pulling && !sending && tick(), IS_AE ? 1000 : 2000);
   window.addEventListener('focus', () => !pulling && !sending && tick());
 })();

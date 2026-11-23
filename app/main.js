@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const { createRelay, DEFAULT_PORT, PORTS } = require('../relay/server');
 const installers = require('./installers');
+const { focusAfterEffects } = require('./focus');
 
 const VERSION = app.getVersion();
 const MAC = process.platform === 'darwin';
@@ -77,6 +78,8 @@ async function startRelay() {
         saveSettings();
         send('event', ev);
         updateTray();
+        // Sent from Illustrator / Photoshop / Figma: jump to After Effects, where the panel builds it.
+        if (ev.type === 'send') focusAfterEffects().catch(() => {});
       },
     });
     try {

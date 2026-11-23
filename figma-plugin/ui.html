@@ -268,7 +268,7 @@
       const res = await fetch(base + '/push', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: m.json });
       const body = await res.json();
       if (!res.ok || !body.ok) throw new Error(body.error || 'HTTP ' + res.status);
-      status('Sent ' + summary + '. Click Pull in After Effects.', 'ok');
+      status('Sent ' + summary + ' to After Effects.', 'ok');
       parent.postMessage({ pluginMessage: { type: 'notify', text: 'Ascend: sent ' + summary } }, '*');
       ping();
     } catch (err) {

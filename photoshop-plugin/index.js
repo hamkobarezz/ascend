@@ -702,7 +702,7 @@ if (ps && typeof document !== 'undefined') {
         await push(toAsciiJSON(payload));
         const n = payload.comps.length;
         const sizes = payload.comps.map((c) => `${c.width}×${c.height}`).join(', ');
-        status(`Sent ${n} comp${n === 1 ? '' : 's'} (${sizes}). Click Pull in AE.`, 'ok');
+        status(`Sent ${n} comp${n === 1 ? '' : 's'} (${sizes}) to After Effects.`, 'ok');
         return;
       }
       status('Reading layers…', 'busy');
@@ -712,7 +712,7 @@ if (ps && typeof document !== 'undefined') {
       showWarnings(payload.warnings);
       status(`Sending ${summary}…`, 'busy');
       await push(toAsciiJSON(payload));
-      status(`Sent ${summary} (${payload.name}, ${payload.width}×${payload.height}). Click Pull in AE.`, 'ok');
+      status(`Sent ${summary} (${payload.name}, ${payload.width}×${payload.height}) to After Effects.`, 'ok');
     } catch (e) {
       const msg = String((e && e.message) || e);
       status(/fetch|network|Failed/i.test(msg) ? "Ascend isn't running. Open the Ascend app and try again." : msg, 'err');

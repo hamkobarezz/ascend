@@ -36,7 +36,7 @@ function safePng(name) {
 }
 
 function createRelay({ port = DEFAULT_PORT, host = '127.0.0.1', version = '', log = console.log, onEvent = () => {} } = {}) {
-  let latest = null; // { payload, at }
+  let latest = null; // { payload, at, pulledAt }
 
   function summary() {
     const base = { ok: true, app: 'hb-bridge', version };
@@ -50,6 +50,7 @@ function createRelay({ port = DEFAULT_PORT, host = '127.0.0.1', version = '', lo
       comps: Array.isArray(p.comps) ? p.comps.length : 0,
       name: p.name,
       at: latest.at,
+      pulled: !!latest.pulledAt, // After Effects auto-pulls only what hasn't been pulled yet
       layers: layers.length,
       images: layers.filter((l) => l.type === 'image').length,
     });
@@ -115,6 +116,11 @@ function createRelay({ port = DEFAULT_PORT, host = '127.0.0.1', version = '', lo
       if (!latest) {
         return send(res, 404, { ok: false, error: 'Nothing sent yet. Click "Send to After Effects" in Figma, Photoshop or Illustrator.' });
       }
+      // ?auto=1 (After Effects auto-pull) claims the payload once, so two open panels can't both build it.
+      if (url.searchParams.get('auto') && latest.pulledAt) {
+        return send(res, 409, { ok: false, error: 'Already pulled.' });
+      }
+      latest.pulledAt = Date.now();
       const out = JSON.parse(JSON.stringify(latest.payload));
       const dir = url.searchParams.get('dir');
       if (dir) {
