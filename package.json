@@ -1,0 +1,53 @@
+{
+  "name": "hb-bridge",
+  "productName": "Ascend",
+  "version": "0.3.0",
+  "description": "Ascend: send layers from Figma, Photoshop and Illustrator to After Effects as native, editable layers.",
+  "author": "Hamko Barez",
+  "homepage": "https://hamkobarezz.com",
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "app/main.js",
+  "scripts": {
+    "start": "npm run assets && electron .",
+    "relay": "node relay/server.js",
+    "assets": "node scripts/make-icons.js && node scripts/build-ccx.js && node scripts/build-zxp.js",
+    "splash": "electron scripts/make-installer-splash.js",
+    "dist:win": "npm run assets && electron-builder --win",
+    "dist:mac": "npm run assets && electron-builder --mac"
+  },
+  "devDependencies": {
+    "electron": "^45.4.1",
+    "electron-builder": "^26.18.0"
+  },
+  "build": {
+    "appId": "com.hamkobarezz.hbbridge",
+    "productName": "Ascend",
+    "copyright": "© Hamko Barez",
+    "directories": { "output": "dist", "buildResources": "build" },
+    "files": ["app/**", "relay/server.js", "package.json"],
+    "extraResources": [
+      { "from": "dist-plugins/ascend.zxp", "to": "plugins/ascend.zxp" },
+      { "from": "dist-plugins/cep-version.json", "to": "plugins/cep-version.json" },
+      { "from": "figma-plugin", "to": "plugins/figma-plugin" },
+      { "from": "dist-plugins/hb-bridge.ccx", "to": "plugins/hb-bridge.ccx" },
+      { "from": "dist-plugins/ps-version.json", "to": "plugins/ps-version.json" }
+    ],
+    "win": { "target": "nsis", "icon": "build/icon.png" },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "runAfterFinish": true,
+      "include": "build/installer.nsh",
+      "shortcutName": "Ascend",
+      "artifactName": "Ascend-Setup-${version}.exe"
+    },
+    "mac": {
+      "target": [{ "target": "dmg", "arch": ["universal"] }],
+      "category": "public.app-category.graphics-design",
+      "icon": "build/icon.png",
+      "extendInfo": { "LSUIElement": true }
+    },
+    "dmg": { "title": "Ascend", "artifactName": "Ascend-${version}.dmg" }
+  }
+}

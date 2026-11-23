@@ -1,0 +1,6 @@
+node_modules/
+dist/
+dist-plugins/
+
+# signing certificate for the ZXP (keep private)
+tools/zxpsign/*.p12

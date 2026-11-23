@@ -1,0 +1,61 @@
+# Builds the Ascend installers: Ascend-Setup-x.y.z.exe (Windows) and Ascend-x.y.z.dmg (macOS,
+# universal: Apple silicon + Intel). A .dmg can only be built on a Mac, so this runs on GitHub's runners.
+# Run it from the Actions tab ("Run workflow") or by pushing a tag like v0.3.0; download the files
+# from the run's "Artifacts" section.
+#
+# Plugin signing needs two repository secrets (Settings > Secrets and variables > Actions), so every
+# build signs the After Effects / Illustrator panel with the same certificate as local builds:
+#   ASCEND_CERT_P12       tools/zxpsign/ascend-cert.p12, base64-encoded
+#   ASCEND_CERT_PASSWORD  its password
+name: Build installers
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            script: dist:win
+            files: dist/*.exe
+          - os: macos-latest
+            script: dist:mac
+            files: dist/*.dmg
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Restore the plugin signing certificate
+        shell: bash
+        env:
+          CERT: ${{ secrets.ASCEND_CERT_P12 }}
+        run: |
+          if [ -z "$CERT" ]; then
+            echo "::error::Add the ASCEND_CERT_P12 and ASCEND_CERT_PASSWORD secrets (see the top of this file)."
+            exit 1
+          fi
+          echo "$CERT" | base64 --decode > tools/zxpsign/ascend-cert.p12
+
+      # Adobe's macOS ZXPSignCmd is Intel-only; GitHub's Mac runners are Apple silicon.
+      - name: Install Rosetta (macOS)
+        if: runner.os == 'macOS'
+        run: /usr/sbin/softwareupdate --install-rosetta --agree-to-license || true
+
+      - run: npm ci
+      - run: npm run ${{ matrix.script }}
+        env:
+          ASCEND_CERT_PASSWORD: ${{ secrets.ASCEND_CERT_PASSWORD }}
+          CSC_IDENTITY_AUTO_DISCOVERY: false # unsigned app build; see README for app signing
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Ascend-${{ matrix.os }}
+          path: ${{ matrix.files }}

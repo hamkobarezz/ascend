@@ -1,0 +1,14 @@
+{
+  "name": "Ascend",
+  "id": "hb-bridge-local-dev",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": ["https://fonts.googleapis.com", "https://fonts.gstatic.com"],
+    "devAllowedDomains": ["http://localhost:7777"],
+    "reasoning": "Loads the brand fonts (Inter Tight, Inter) and sends the exported layers to the local Ascend relay, which After Effects pulls from."
+  }
+}

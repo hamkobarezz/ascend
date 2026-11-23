@@ -1,0 +1,263 @@
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800&family=Inter:wght@400;500&display=swap" />
+<style>
+  /* hamkobarezz.com brand: dark ground, off-white rules, one heavy wordmark, orange only for accents */
+  :root {
+    --ink: #0d0d0f;
+    --paper: #efead8;
+    --accent: #ff5a1f;
+    --mute: #8d897d;
+    --line: #2a2925;
+    --tile: #141417;
+    --hover: #1c1c20;
+    --display: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
+    --body: "Inter", "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--ink); color: var(--paper); font: 13px/1.45 var(--body); -webkit-font-smoothing: antialiased; padding: 16px; }
+  ::selection { background: var(--accent); color: var(--ink); }
+  svg.i { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: square; stroke-linejoin: miter; flex: none; }
+
+  /* header */
+  .top { display: flex; align-items: center; gap: 10px; }
+  .mark { width: 30px; height: 22px; flex: none; }
+  .logo { font: 700 23px/1 var(--display); letter-spacing: -0.05em; color: var(--paper); }
+  .logo b { color: var(--paper); font-weight: 800; margin-left: 3px; }
+  .chip { margin-left: auto; display: flex; align-items: center; gap: 6px; height: 22px; padding: 0 8px; border: 1px solid var(--line); font: 10px var(--mono); letter-spacing: 0.08em; color: var(--mute); }
+  .chip i { width: 7px; height: 7px; background: var(--mute); }
+  .chip.on { color: var(--paper); }
+  .chip.on i { background: var(--accent); box-shadow: 0 0 8px rgba(255, 90, 31, 0.8); }
+
+  /* app flow */
+  .flow { display: flex; align-items: center; gap: 8px; margin-top: 14px; font: 10px var(--mono); letter-spacing: 0.08em; color: var(--mute); }
+  .app { display: grid; place-items: center; width: 26px; height: 26px; border: 1px solid var(--line); font: 700 11px var(--display); color: var(--paper); background: var(--tile); }
+  .app.ae { border-color: var(--accent); color: var(--accent); }
+  .flow .dash { flex: 1; height: 1px; background: repeating-linear-gradient(90deg, var(--line) 0 4px, transparent 4px 8px); }
+  .flow svg { color: var(--accent); width: 14px; height: 14px; }
+
+  /* selection */
+  .sel { display: flex; align-items: center; gap: 12px; margin-top: 12px; padding: 12px; border: 1px solid var(--line); background: var(--tile); }
+  .sel .ico { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid var(--line); background: var(--ink); color: var(--paper); }
+  .sel .label { font: 10px var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--mute); }
+  .sel .name { font: 700 15px/1.2 var(--display); letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+  .sel.empty .name { color: var(--mute); }
+  .sel.empty .ico { color: var(--mute); }
+
+  /* options */
+  .section { margin-top: 16px; font: 10px var(--mono); letter-spacing: 0.1em; color: var(--mute); }
+  .opt { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); cursor: pointer; user-select: none; }
+  .opt:first-of-type { border-top: 1px solid var(--line); margin-top: 6px; }
+  .opt > svg { color: var(--mute); }
+  .opt .txt { flex: 1; }
+  .opt small { display: block; font-size: 11px; color: var(--mute); }
+  .switch { position: relative; width: 34px; height: 18px; border: 1px solid var(--mute); flex: none; transition: background 0.2s, border-color 0.2s; }
+  .switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 10px; height: 10px; background: var(--mute); transition: left 0.2s, background 0.2s; }
+  .opt.on .switch { background: var(--accent); border-color: var(--accent); }
+  .opt.on .switch::after { left: 19px; background: var(--ink); }
+  .opt.on > svg { color: var(--accent); }
+  .seg { display: flex; }
+  .seg button { width: 32px; height: 24px; border: 1px solid var(--line); margin-left: -1px; background: var(--ink); color: var(--mute); font: 700 10px var(--mono); cursor: pointer; }
+  .seg button.on { background: var(--paper); border-color: var(--paper); color: var(--ink); position: relative; }
+
+  /* tiles */
+  .tile { display: flex; align-items: center; gap: 12px; width: 100%; margin-top: 16px; padding: 10px 14px 10px 10px; border: 1px solid var(--line); background: var(--tile); color: var(--paper); text-align: left; cursor: pointer; font: inherit; transition: background 0.2s, border-color 0.2s, color 0.2s; }
+  .tile .ico { display: grid; place-items: center; width: 38px; height: 38px; background: var(--ink); color: var(--paper); flex: none; }
+  .tile .t { flex: 1; min-width: 0; }
+  .tile b { display: block; font: 700 14px/1.2 var(--display); letter-spacing: -0.01em; }
+  .tile span { display: block; font-size: 11px; color: var(--mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tile .chev { color: inherit; transition: transform 0.3s; }
+  .tile:hover:not(:disabled) .chev { transform: translateX(4px); }
+  .tile.hot { background: var(--accent); border-color: var(--accent); color: var(--ink); }
+  .tile.hot .ico { color: var(--accent); }
+  .tile.hot span { color: #4d1a08; }
+  .tile.hot:hover:not(:disabled) { background: var(--paper); border-color: var(--paper); }
+  .tile:disabled { opacity: 0.35; cursor: default; }
+  .tile:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .tile.busy .ico svg { animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* status */
+  .status { display: flex; align-items: center; gap: 10px; margin-top: 10px; padding: 9px 12px; border: 1px solid var(--line); background: var(--tile); font: 11px/1.4 var(--mono); color: var(--paper); }
+  .status i { width: 8px; height: 8px; flex: none; background: var(--mute); }
+  .status.ok i { background: var(--accent); }
+  .status.err { color: var(--accent); }
+  .status.err i { background: #ee4b3b; }
+  .status.busy i { background: var(--paper); animation: blink 0.8s steps(2) infinite; }
+  @keyframes blink { 50% { opacity: 0.2; } }
+  #warnings { margin: 6px 0 0; padding: 0; list-style: none; max-height: 90px; overflow: auto; }
+  #warnings li { display: flex; gap: 8px; font-size: 11px; color: var(--mute); padding: 5px 0; border-top: 1px solid var(--line); }
+  #warnings li::before { content: "!"; font: 700 10px var(--mono); color: var(--accent); }
+
+  .foot { display: flex; justify-content: space-between; margin-top: 12px; font: 10px var(--mono); letter-spacing: 0.06em; color: var(--mute); }
+</style>
+
+<svg width="0" height="0" style="position: absolute">
+  <defs>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M3 12h16M13 6l6 6-6 6" /></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" /></symbol>
+    <symbol id="i-frame" viewBox="0 0 24 24"><path d="M7 3v18M17 3v18M3 7h18M3 17h18" /></symbol>
+    <symbol id="i-empty" viewBox="0 0 24 24"><path d="M4 4h16v16H4z" stroke-dasharray="3 3" /></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><path d="M3 5h18v14H3zM5 17l5-6 4 4 2-2 3 4" /><circle cx="16" cy="9" r="1.5" /></symbol>
+    <symbol id="i-flatten" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5 9-5zM3 13l9 5 9-5" /></symbol>
+    <symbol id="i-spin" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9" /></symbol>
+  </defs>
+</svg>
+
+<div class="top">
+  <svg class="mark" viewBox="0 0 368 268" aria-hidden="true"><path d="M0 268 L132 80 L196 164 L264 52 L368 268 Z" fill="#efead8" /><circle cx="56" cy="28" r="28" fill="#ff5a1f" /></svg>
+  <div class="logo">ascend</div>
+  <div class="chip" id="relay"><i></i><span>ASCEND APP</span></div>
+</div>
+
+<div class="flow">
+  <div class="app">Fg</div><div class="dash"></div>
+  <svg class="i"><use href="#i-send" /></svg>
+  <div class="dash"></div><div class="app ae">Ae</div>
+  <span>NATIVE LAYERS</span>
+</div>
+
+<div class="sel empty" id="selbox">
+  <div class="ico"><svg class="i" id="selIco"><use href="#i-empty" /></svg></div>
+  <div>
+    <div class="label" id="selLabel">Selection</div>
+    <div class="name" id="sel">Select a frame</div>
+  </div>
+</div>
+
+<div class="section">OPTIONS</div>
+<div class="opt" id="optScale">
+  <svg class="i"><use href="#i-image" /></svg>
+  <div class="txt">PNG scale<small>For gradients, images, effects</small></div>
+  <div class="seg" id="scale">
+    <button data-v="1">1x</button><button data-v="2" class="on">2x</button><button data-v="3">3x</button><button data-v="4">4x</button>
+  </div>
+</div>
+<div class="opt" id="optRaster">
+  <svg class="i"><use href="#i-flatten" /></svg>
+  <div class="txt">Rasterize everything<small>Flatten every layer to a PNG</small></div>
+  <div class="switch"></div>
+</div>
+
+<button class="tile hot" id="push" disabled>
+  <div class="ico"><svg class="i" id="pushIco"><use href="#i-send" /></svg></div>
+  <div class="t"><b>Send to After Effects</b><span id="pushSub">Select something first</span></div>
+  <svg class="i chev"><use href="#i-chev" /></svg>
+</button>
+
+<div class="status" id="status"><i></i><span id="statusText">Ready. Tag a layer #raster to always flatten it.</span></div>
+<ul id="warnings"></ul>
+
+<div class="foot"><span>ASCEND · V0.3</span><span>HAMKOBAREZZ.COM</span></div>
+
+<script>
+  const RELAY = 'http://localhost:7777'; // the Ascend desktop app
+  const $ = (id) => document.getElementById(id);
+  let busy = false;
+  let count = 0;
+  let scale = 2;
+  let rasterAll = false;
+  let selName = '';
+
+  function refresh() {
+    $('push').disabled = busy || count === 0;
+    $('pushSub').textContent = count === 0 ? 'Select something first' : count === 1 ? selName + ' · shapes, text, groups, masks' : count + ' layers · shapes, text, groups, masks';
+  }
+  function status(text, kind) {
+    $('statusText').textContent = text;
+    $('status').className = 'status ' + (kind || '');
+  }
+  function showWarnings(list) {
+    const ul = $('warnings');
+    ul.innerHTML = '';
+    (list || []).slice(0, 30).forEach((w) => {
+      const li = document.createElement('li');
+      li.textContent = w;
+      ul.appendChild(li);
+    });
+  }
+  function setBusy(b) {
+    busy = b;
+    $('push').classList.toggle('busy', b);
+    $('pushIco').innerHTML = b ? '<use href="#i-spin" />' : '<use href="#i-send" />';
+    refresh();
+  }
+
+  // options
+  $('scale').addEventListener('click', (e) => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    scale = +b.dataset.v;
+    [...$('scale').children].forEach((x) => x.classList.toggle('on', x === b));
+  });
+  $('optRaster').addEventListener('click', () => {
+    rasterAll = !rasterAll;
+    $('optRaster').classList.toggle('on', rasterAll);
+  });
+
+  // relay light
+  async function ping() {
+    try {
+      const r = await fetch(RELAY + '/status', { cache: 'no-store' });
+      const s = await r.json();
+      $('relay').classList.add('on');
+      $('relay').title = s.has ? `Waiting for After Effects: ${s.source} · ${s.name}` : 'Ascend app is running';
+      $('relay').querySelector('span').textContent = 'APP ONLINE';
+    } catch (e) {
+      $('relay').classList.remove('on');
+      $('relay').title = 'Open the Ascend app';
+      $('relay').querySelector('span').textContent = 'OPEN ASCEND APP';
+    }
+  }
+  ping();
+  setInterval(ping, 3000);
+
+  $('push').onclick = () => {
+    setBusy(true);
+    showWarnings([]);
+    status('Reading layers…', 'busy');
+    parent.postMessage({ pluginMessage: { type: 'export', mode: 'push', scale, rasterizeAll: rasterAll } }, '*');
+  };
+
+  onmessage = async (e) => {
+    const m = e.data.pluginMessage;
+    if (!m) return;
+
+    if (m.type === 'selection') {
+      count = m.count;
+      selName = m.name;
+      $('sel').textContent = m.count === 0 ? 'Select a frame' : m.count === 1 ? m.name : m.count + ' layers';
+      $('selLabel').textContent = m.count === 0 ? 'Nothing selected' : 'Selection';
+      $('selIco').innerHTML = m.count === 0 ? '<use href="#i-empty" />' : '<use href="#i-frame" />';
+      $('selbox').classList.toggle('empty', m.count === 0);
+      refresh();
+      return;
+    }
+    if (m.type === 'error') {
+      status(m.message, 'err');
+      setBusy(false);
+      return;
+    }
+    if (m.type !== 'payload') return;
+
+    const summary = `${m.layers} layer${m.layers === 1 ? '' : 's'}, ${m.images} image${m.images === 1 ? '' : 's'}`;
+    showWarnings(m.warnings);
+    status('Sending ' + summary + '…', 'busy');
+    try {
+      const res = await fetch(RELAY + '/push', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: m.json });
+      const body = await res.json();
+      if (!res.ok || !body.ok) throw new Error(body.error || 'HTTP ' + res.status);
+      status('Sent ' + summary + '. Click Pull in After Effects.', 'ok');
+      parent.postMessage({ pluginMessage: { type: 'notify', text: 'Ascend: sent ' + summary } }, '*');
+      ping();
+    } catch (err) {
+      status("Ascend isn't running. Open the Ascend app and click Send again.", 'err');
+    }
+    setBusy(false);
+  };
+  refresh();
+</script>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      /* hamkobarezz.com brand: dark ground, off-white rules, one heavy wordmark, orange only for accents.
+         Plain flexbox + <img> icons only, so it renders the same in Photoshop's UXP engine. */
+      body { margin: 0; padding: 14px; background-color: #0d0d0f; color: #efead8; font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif; font-size: 13px; }
+      .row { display: flex; flex-direction: row; align-items: center; }
+      .grow { flex: 1; }
+      .mono { font-family: Consolas, Menlo, monospace; font-size: 10px; letter-spacing: 1px; color: #8d897d; }
+      .ic { width: 18px; height: 18px; }
+
+      .logo { margin-left: 8px; font-family: "Inter Tight", "Segoe UI", "Helvetica Neue", Arial, sans-serif; font-weight: 700; font-size: 22px; letter-spacing: -1px; color: #efead8; }
+      .logo span { color: #efead8; }
+      .chip { padding: 3px 7px; border: 1px solid #2a2925; }
+      .chip .dot { width: 7px; height: 7px; margin-right: 6px; background-color: #8d897d; }
+      .chip.on { color: #efead8; }
+      .chip.on .dot { background-color: #ff5a1f; }
+
+      .flow { margin-top: 12px; }
+      .app { width: 26px; height: 26px; border: 1px solid #2a2925; background-color: #141417; justify-content: center; font-weight: 700; font-size: 11px; color: #efead8; }
+      .app.ae { border-color: #ff5a1f; color: #ff5a1f; }
+      .dash { flex: 1; height: 1px; margin: 0 6px; border-top: 1px dashed #2a2925; }
+
+      .card { margin-top: 12px; padding: 10px; border: 1px solid #2a2925; background-color: #141417; }
+      .icobox { width: 36px; height: 36px; margin-right: 12px; justify-content: center; background-color: #0d0d0f; border: 1px solid #2a2925; }
+      .card .name { margin-top: 2px; font-weight: 700; font-size: 15px; color: #efead8; }
+
+      .tile { margin-top: 10px; padding: 9px 12px 9px 9px; border: 1px solid #2a2925; background-color: #141417; }
+      .tile:hover { border-color: #efead8; background-color: #1c1c20; }
+      .tile .icobox { border-color: #2a2925; }
+      .tile b { display: block; font-weight: 700; font-size: 14px; color: #efead8; }
+      .tile .sub { font-size: 11px; color: #8d897d; }
+      .tile.hot { margin-top: 14px; background-color: #ff5a1f; border-color: #ff5a1f; }
+      .tile.hot:hover { background-color: #efead8; border-color: #efead8; }
+      .tile.hot b { color: #0d0d0f; }
+      .tile.hot .sub { color: #4d1a08; }
+      .tile.hot .icobox { border-color: #0d0d0f; }
+      .tile.busy { opacity: 0.45; }
+
+      .section { margin-top: 16px; margin-bottom: 4px; }
+      .opt { padding: 9px 0; border-bottom: 1px solid #2a2925; }
+      .opt .ic { margin-right: 10px; opacity: 0.6; }
+      .opt.on .ic { opacity: 1; }
+      .opt .hint { font-size: 10px; color: #8d897d; }
+      .switch { width: 32px; height: 16px; border: 1px solid #8d897d; padding: 2px; }
+      .knob { width: 10px; height: 10px; background-color: #8d897d; }
+      .opt.on .switch { background-color: #ff5a1f; border-color: #ff5a1f; justify-content: flex-end; }
+      .opt.on .knob { background-color: #0d0d0f; }
+      .seg div { padding: 4px 7px; margin-left: -1px; border: 1px solid #2a2925; font-family: Consolas, Menlo, monospace; font-size: 10px; color: #8d897d; }
+      .seg div.on { background-color: #efead8; border-color: #efead8; color: #0d0d0f; }
+
+      .status { margin-top: 12px; padding: 8px 10px; border: 1px solid #2a2925; background-color: #141417; font-family: Consolas, Menlo, monospace; font-size: 11px; color: #efead8; }
+      .status .dot { width: 8px; height: 8px; margin-right: 10px; background-color: #8d897d; }
+      .status.ok .dot { background-color: #ff5a1f; }
+      .status.busy .dot { background-color: #efead8; }
+      .status.err { color: #ff5a1f; }
+      .status.err .dot { background-color: #ee4b3b; }
+      #warnings div { font-size: 10px; color: #8d897d; padding: 4px 0; border-top: 1px solid #2a2925; }
+      .foot { margin-top: 12px; justify-content: space-between; }
+    </style>
+  </head>
+  <body>
+    <div class="row">
+      <img src="icons/ascend.svg" width="30" height="22" />
+      <div class="logo">ascend</div>
+      <div class="grow"></div>
+      <div class="row chip mono" id="relay"><div class="dot"></div><span id="relayText">ASCEND APP</span></div>
+    </div>
+
+    <div class="row flow">
+      <div class="row app">Ps</div><div class="dash"></div>
+      <img class="ic" src="icons/send.svg" />
+      <div class="dash"></div><div class="row app ae">Ae</div>
+      <div class="mono" style="margin-left: 8px">NATIVE LAYERS</div>
+    </div>
+
+    <div class="row card">
+      <div class="row icobox"><img class="ic" id="docIco" src="icons/doc.svg" /></div>
+      <div class="grow">
+        <div class="mono" id="docMeta">DOCUMENT</div>
+        <div class="name" id="docName">No document open</div>
+      </div>
+    </div>
+
+    <div class="row tile hot" id="send">
+      <div class="row icobox"><img class="ic" src="icons/send-accent.svg" /></div>
+      <div class="grow"><b>Send to After Effects</b><div class="sub" id="sendSub">Shapes, text, groups, clipping masks</div></div>
+      <img class="ic" src="icons/chev-ink.svg" />
+    </div>
+    <div class="row tile" id="comp">
+      <div class="row icobox"><img class="ic" src="icons/comp.svg" /></div>
+      <div class="grow"><b id="compTitle">Make comp</b><div class="sub" id="compHint">Same size as the canvas</div></div>
+      <img class="ic" src="icons/chev.svg" />
+    </div>
+
+    <div class="mono section">OPTIONS</div>
+    <div class="row opt" id="optSel">
+      <img class="ic" src="icons/select.svg" />
+      <div class="grow">Selected layers only<div class="hint">Off = whole canvas or active artboard</div></div>
+      <div class="row switch"><div class="knob"></div></div>
+    </div>
+    <div class="row opt">
+      <img class="ic" src="icons/style.svg" style="opacity: 1" />
+      <div class="grow">Layer styles<div class="hint">Shadows, glows, strokes…</div></div>
+      <div class="row seg" id="fxSeg"><div data-v="raster" class="on">FLATTEN</div><div data-v="ignore">KEEP LIVE</div></div>
+    </div>
+    <div class="row opt" id="optRaster">
+      <img class="ic" src="icons/image.svg" />
+      <div class="grow">Rasterize everything<div class="hint">Every layer becomes a PNG</div></div>
+      <div class="row switch"><div class="knob"></div></div>
+    </div>
+
+    <div class="row status" id="status"><div class="dot"></div><div class="grow" id="statusText">Ready.</div></div>
+    <div id="warnings"></div>
+
+    <div class="row foot mono"><span>ASCEND · V0.3</span><span>HAMKOBAREZZ.COM</span></div>
+
+    <script src="index.js"></script>
+  </body>
+</html>

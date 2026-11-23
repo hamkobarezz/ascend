@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Ascend CEP extension bundle: one panel for After Effects, one for Illustrator.
+     Packaged and signed as dist-plugins/ascend.zxp by scripts/build-zxp.js; the Ascend app
+     installs it through Adobe's installer (UPIA). Keep ExtensionBundleVersion in sync with package.json. -->
+<ExtensionManifest Version="7.0" ExtensionBundleId="com.hamkobarezz.ascend" ExtensionBundleVersion="0.3.0" ExtensionBundleName="Ascend"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Author><![CDATA[Hamko Barez]]></Author>
+  <Legal href="https://hamkobarezz.com"><![CDATA[© Hamko Barez]]></Legal>
+  <Abstract href="https://hamkobarezz.com"><![CDATA[Send layers from Illustrator, Photoshop and Figma to After Effects as native, editable layers.]]></Abstract>
+  <ExtensionList>
+    <Extension Id="com.hamkobarezz.ascend.ae" Version="0.3.0" />
+    <Extension Id="com.hamkobarezz.ascend.ai" Version="0.3.0" />
+  </ExtensionList>
+  <ExecutionEnvironment>
+    <HostList>
+      <Host Name="AEFT" Version="[22.0,99.9]" />
+      <Host Name="ILST" Version="[26.0,99.9]" />
+    </HostList>
+    <LocaleList>
+      <Locale Code="All" />
+    </LocaleList>
+    <RequiredRuntimeList>
+      <RequiredRuntime Name="CSXS" Version="9.0" />
+    </RequiredRuntimeList>
+  </ExecutionEnvironment>
+  <DispatchInfoList>
+    <Extension Id="com.hamkobarezz.ascend.ae">
+      <HostList>
+        <Host Name="AEFT" Version="[22.0,99.9]" />
+      </HostList>
+      <DispatchInfo>
+        <Resources>
+          <MainPath>./index.html</MainPath>
+          <ScriptPath>./host/ae.jsx</ScriptPath>
+          <CEFCommandLine>
+            <Parameter>--enable-nodejs</Parameter>
+            <Parameter>--mixed-context</Parameter>
+          </CEFCommandLine>
+        </Resources>
+        <Lifecycle>
+          <AutoVisible>true</AutoVisible>
+        </Lifecycle>
+        <UI>
+          <Type>Panel</Type>
+          <Menu>Ascend</Menu>
+          <Geometry>
+            <Size><Height>520</Height><Width>300</Width></Size>
+            <MinSize><Height>360</Height><Width>240</Width></MinSize>
+            <MaxSize><Height>2000</Height><Width>1200</Width></MaxSize>
+          </Geometry>
+          <Icons>
+            <Icon Type="Normal">./icons/icon-light.png</Icon>
+            <Icon Type="RollOver">./icons/icon-light.png</Icon>
+            <Icon Type="DarkNormal">./icons/icon-dark.png</Icon>
+            <Icon Type="DarkRollOver">./icons/icon-dark.png</Icon>
+          </Icons>
+        </UI>
+      </DispatchInfo>
+    </Extension>
+    <Extension Id="com.hamkobarezz.ascend.ai">
+      <HostList>
+        <Host Name="ILST" Version="[26.0,99.9]" />
+      </HostList>
+      <DispatchInfo>
+        <Resources>
+          <MainPath>./index.html</MainPath>
+          <ScriptPath>./host/ai.jsx</ScriptPath>
+          <CEFCommandLine>
+            <Parameter>--enable-nodejs</Parameter>
+            <Parameter>--mixed-context</Parameter>
+          </CEFCommandLine>
+        </Resources>
+        <Lifecycle>
+          <AutoVisible>true</AutoVisible>
+        </Lifecycle>
+        <UI>
+          <Type>Panel</Type>
+          <Menu>Ascend</Menu>
+          <Geometry>
+            <Size><Height>560</Height><Width>300</Width></Size>
+            <MinSize><Height>380</Height><Width>240</Width></MinSize>
+            <MaxSize><Height>2000</Height><Width>1200</Width></MaxSize>
+          </Geometry>
+          <Icons>
+            <Icon Type="Normal">./icons/icon-light.png</Icon>
+            <Icon Type="RollOver">./icons/icon-light.png</Icon>
+            <Icon Type="DarkNormal">./icons/icon-dark.png</Icon>
+            <Icon Type="DarkRollOver">./icons/icon-dark.png</Icon>
+          </Icons>
+        </UI>
+      </DispatchInfo>
+    </Extension>
+  </DispatchInfoList>
+</ExtensionManifest>

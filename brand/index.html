@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ascend: visual identity</title>
+<link rel="icon" href="ascend-icon-small.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;700;800&family=Inter:wght@400;500&display=swap">
+<style>
+:root{
+  --ink:#0d0d0f; --tile:#141417; --line:#2a2925; --cloud:#3a3832;
+  --mute:#8d897d; --paper:#efead8; --accent:#ff5a1f;
+  --display:"Inter Tight","Helvetica Neue",Arial,sans-serif;
+  --body:"Inter","Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--ink);color:var(--paper);font:15px/1.55 var(--body);-webkit-font-smoothing:antialiased}
+::selection{background:var(--accent);color:var(--ink)}
+.wrap{max-width:1200px;margin:0 auto;padding:clamp(24px,4vw,48px) clamp(16px,4vw,48px) 96px}
+.kicker,.tag{font:12px/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.kicker{display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:space-between}
+.kicker b{color:var(--accent);font-weight:400}
+hr{border:0;border-top:1px solid var(--paper);margin:0}
+h1,h2,h3{font-family:var(--display);margin:0}
+.hero{padding:clamp(56px,10vw,140px) 0 clamp(40px,6vw,80px)}
+.lockup{display:flex;align-items:flex-end;gap:.14em;font:700 clamp(72px,15vw,220px)/.8 var(--display);letter-spacing:-.05em}
+.lockup svg{height:.74em;width:auto;flex:none;margin-bottom:.02em}
+.hero p{max-width:34em;margin:32px 0 0;font-size:clamp(17px,1.6vw,21px);color:var(--mute)}
+.hero p span{color:var(--paper)}
+section{padding:56px 0;border-top:1px solid var(--line)}
+.sechead{display:grid;grid-template-columns:minmax(160px,1fr) 3fr;gap:24px;margin-bottom:32px}
+.sechead h2{font-weight:700;font-size:clamp(26px,3vw,40px);letter-spacing:-.04em;line-height:1}
+.sechead .num{font:12px var(--mono);color:var(--accent)}
+.sechead p{margin:0;color:var(--mute);max-width:40em}
+.grid{display:grid;gap:16px}
+.g3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.card{border:1px solid var(--line);border-radius:4px;overflow:hidden;background:var(--tile)}
+.card .stage{aspect-ratio:4/3;display:grid;place-items:center}
+.card .stage svg{width:42%;height:auto}
+.card .meta{display:flex;justify-content:space-between;gap:12px;padding:12px 14px;border-top:1px solid var(--line)}
+.on-ink{background:var(--ink)} .on-paper{background:var(--paper)} .on-orange{background:var(--accent)}
+.construct{display:grid;grid-template-columns:1.2fr 1fr;gap:16px}
+.construct .stage{aspect-ratio:auto;min-height:340px}
+.construct .stage svg{width:62%}
+.notes{display:grid;gap:0;align-content:start}
+.notes div{padding:18px 0;border-bottom:1px solid var(--line)}
+.notes div:first-child{padding-top:0}
+.notes h3{font-size:18px;font-weight:700;letter-spacing:-.02em;margin-bottom:4px}
+.notes p{margin:0;color:var(--mute)}
+.icons{display:flex;flex-wrap:wrap;align-items:flex-end;gap:40px;padding:40px;border:1px solid var(--line);border-radius:4px;background:var(--paper)}
+.icons .tag{color:#5d5a53}
+.icons figure{margin:0;display:grid;justify-items:center;gap:12px}
+.icons img{display:block}
+.swatches{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.sw{display:flex;flex-direction:column}
+.sw .chip{height:150px}
+.sw .info{padding:12px 14px;border-top:1px solid var(--line);display:grid;gap:2px}
+.sw .info b{font:700 16px var(--display);letter-spacing:-.01em}
+.ratio{display:flex;height:14px;margin-top:16px;border-radius:2px;overflow:hidden}
+.type{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.type .card{padding:28px}
+.type .big{font:700 84px/1 var(--display);letter-spacing:-.05em;margin:12px 0 18px}
+.type .body{font:400 56px/1 var(--body);margin:12px 0 18px}
+.type .monoeg{font:400 40px/1 var(--mono);margin:22px 0 22px}
+.use{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.panel{background:#232323;border-radius:4px;border:1px solid #111;font:12px/1.4 Arial,sans-serif;color:#cfcfcf;overflow:hidden}
+.panel .bar{background:#1a1a1a;padding:6px 10px;display:flex;gap:8px;align-items:center;border-bottom:1px solid #111;color:#9a9a9a}
+.panel .bar .tabname{color:#ddd}
+.panel .body{padding:18px;display:grid;gap:14px}
+.panel .brandrow{display:flex;align-items:center;gap:10px;font:700 22px var(--display);letter-spacing:-.04em;color:var(--paper)}
+.panel .brandrow img{width:28px}
+.panel .brandrow small{margin-left:auto;font:11px var(--mono);color:var(--mute);letter-spacing:.04em}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;border-radius:3px;font:700 14px var(--display);letter-spacing:-.01em}
+.btn.primary{background:var(--accent);color:var(--ink)}
+.btn.ghost{border:1px solid #3c3c3c;color:#ddd}
+.panel .status{display:flex;align-items:center;gap:8px;color:#8a8a8a;font:11px var(--mono)}
+.panel .status i{width:7px;height:7px;border-radius:50%;background:#46c46a}
+.product{display:grid;grid-template-rows:auto 1fr}
+.product .cover{aspect-ratio:16/9;background:var(--ink);display:grid;place-items:center;position:relative;border-bottom:1px solid var(--line)}
+.product .cover .lockup{font-size:clamp(44px,5.4vw,72px)}
+.product .cover .flow{position:absolute;left:16px;right:16px;bottom:14px;display:flex;justify-content:space-between}
+.product .txt{padding:18px}
+.product h3{font-size:22px;font-weight:700;letter-spacing:-.03em}
+.product p{margin:6px 0 0;color:var(--mute)}
+.voice{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.voice .card{padding:24px}
+.voice q{display:block;font:700 26px/1.1 var(--display);letter-spacing:-.03em;margin-top:10px;quotes:none}
+.voice q em{font-style:normal;color:var(--accent)}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.rules .card .stage{aspect-ratio:3/2}
+.rules .card .stage svg{width:34%}
+.x{color:var(--accent)}
+footer{margin-top:56px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+footer a{color:var(--paper);border-bottom:1px solid var(--line)}
+@media (max-width:820px){.sechead,.construct,.use{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="peak" viewBox="0 0 368 268"><path d="M0 268 L132 80 L196 164 L264 52 L368 268 Z" fill="var(--pk,#efead8)"/><circle cx="56" cy="28" r="28" fill="var(--ch,#ff5a1f)"/></symbol>
+</svg>
+
+<div class="wrap">
+  <div class="kicker"><span><b>●</b> Ascend / visual identity</span><span>v0.1, Nov 2026</span><span>By Hamko Barezz</span></div>
+
+  <header class="hero">
+    <h1 class="lockup" aria-label="ascend"><svg viewBox="0 0 368 268" aria-hidden="true"><use href="#peak"/></svg>ascend</h1>
+    <p><span>Illustrator, Photoshop and Figma to After Effects, as native, editable layers.</span> The identity comes from the hamkobarezz.com system: a dark ground, off-white type, and orange used only where it matters.</p>
+  </header>
+
+  <section>
+    <div class="sechead"><div><span class="num">01</span><h2>The mark</h2></div><p>Two peaks and a sun. The higher peak on the right reads as a climb from left to right, from your design app up into After Effects. The orange sun is the one warm point in the mark.</p></div>
+    <div class="construct">
+      <div class="card"><div class="stage on-ink" style="position:relative">
+        <svg viewBox="-102 -40 572 348" aria-label="Mark construction">
+          <g stroke="#3a3832" stroke-width="1" fill="none" stroke-dasharray="4 4">
+            <line x1="-40" y1="52" x2="420" y2="52"/><line x1="-40" y1="268" x2="420" y2="268"/>
+            <line x1="264" y1="-30" x2="264" y2="300"/><line x1="132" y1="-30" x2="132" y2="300"/>
+            <circle cx="56" cy="28" r="44"/>
+            <rect x="0" y="0" width="368" height="268"/>
+          </g>
+          <use href="#peak" width="368" height="268"/>
+          <g font-family="ui-monospace,Menlo,Consolas,monospace" font-size="11" fill="#8d897d">
+            <text x="376" y="48">summit</text><text x="376" y="264">base 368</text><text x="-96" y="32">sun</text>
+          </g>
+        </svg>
+      </div><div class="meta"><span class="tag">Construction</span><span class="tag">Base : height = 1.37 : 1</span></div></div>
+      <div class="notes">
+        <div><h3>One shape, one accent</h3><p>Off-white peaks with an orange sun. Never add a second accent colour.</p></div>
+        <div><h3>Sharp ridge, round sun</h3><p>Hard straight edges keep it bold. The single circle softens it and gives the eye a starting point.</p></div>
+        <div><h3>Clear space</h3><p>Leave space equal to the sun's diameter on every side of the mark. More is better.</p></div>
+        <div><h3>Minimum size</h3><p>Use the standard mark at 24px and up. Below that, use <code>ascend-icon-small.svg</code>, which has a larger sun and a simpler ridge.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sechead"><div><span class="num">02</span><h2>Variants</h2></div><p>Ink is the default background. Use paper for print and light UIs, and the orange ground only for one-off moments like a launch post.</p></div>
+    <div class="grid g3">
+      <div class="card"><div class="stage on-ink"><svg viewBox="0 0 368 268"><use href="#peak"/></svg></div><div class="meta"><span class="tag">Primary / on ink</span><span class="tag">ascend-mark.svg</span></div></div>
+      <div class="card"><div class="stage on-paper"><svg viewBox="0 0 368 268" style="--pk:#0d0d0f"><use href="#peak"/></svg></div><div class="meta"><span class="tag">On paper</span><span class="tag">ascend-mark-dark.svg</span></div></div>
+      <div class="card"><div class="stage on-orange"><svg viewBox="0 0 368 268" style="--pk:#0d0d0f;--ch:#efead8"><use href="#peak"/></svg></div><div class="meta"><span class="tag">On orange</span><span class="tag">Sun turns paper</span></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sechead"><div><span class="num">03</span><h2>App icon</h2></div><p>For the After Effects panel, the Illustrator, Photoshop and Figma plugin listings, and store thumbnails. From 32px down, the small version uses a larger sun so it doesn't disappear.</p></div>
+    <div class="icons">
+      <figure><img src="ascend-icon.svg" width="128" height="128" alt="Ascend icon 128px"><figcaption class="tag">128</figcaption></figure>
+      <figure><img src="ascend-icon.svg" width="64" height="64" alt="Ascend icon 64px"><figcaption class="tag">64</figcaption></figure>
+      <figure><img src="ascend-icon-small.svg" width="32" height="32" alt="Ascend icon 32px"><figcaption class="tag">32 · small</figcaption></figure>
+      <figure><img src="ascend-icon-small.svg" width="16" height="16" alt="Ascend icon 16px"><figcaption class="tag">16 · small</figcaption></figure>
+    </div>
+  </section>
+
+  <section>
+    <div class="sechead"><div><span class="num">04</span><h2>Colour</h2></div><p>The same palette as hamkobarezz.com. Use it mostly dark, and keep orange to roughly one thing per screen: the main button, the sun, or a highlighted word.</p></div>
+    <div class="swatches">
+      <div class="sw"><div class="chip" style="background:#0d0d0f"></div><div class="info"><b>Ink</b><span class="tag">#0d0d0f · ground</span></div></div>
+      <div class="sw"><div class="chip" style="background:#141417"></div><div class="info"><b>Tile</b><span class="tag">#141417 · surfaces</span></div></div>
+      <div class="sw"><div class="chip" style="background:#2a2925"></div><div class="info"><b>Line</b><span class="tag">#2a2925 · rules</span></div></div>
+      <div class="sw"><div class="chip" style="background:#8d897d"></div><div class="info"><b>Mute</b><span class="tag">#8d897d · secondary</span></div></div>
+      <div class="sw"><div class="chip" style="background:#efead8"></div><div class="info"><b>Paper</b><span class="tag">#efead8 · type, mark</span></div></div>
+      <div class="sw"><div class="chip" style="background:#ff5a1f"></div><div class="info"><b>Orange</b><span class="tag">#ff5a1f · accent only</span></div></div>
+    </div>
+    <div class="ratio" aria-label="Colour ratio: 70 ink, 15 tile, 10 paper, 5 orange">
+      <span style="flex:70;background:#0d0d0f;border:1px solid #2a2925"></span><span style="flex:15;background:#141417"></span><span style="flex:10;background:#efead8"></span><span style="flex:5;background:#ff5a1f"></span>
+    </div>
+    <p class="tag" style="margin:8px 0 0">Ratio 70 ink / 15 tile / 10 paper / 5 orange</p>
+  </section>
+
+  <section>
+    <div class="sechead"><div><span class="num">05</span><h2>Type</h2></div><p>The website's type system. The wordmark is Inter Tight Bold, lowercase, with tight tracking. Use mono uppercase for small labels and technical details.</p></div>
+    <div class="type">
+      <div class="card"><span class="tag">Display · Inter Tight 700, -4%</span><div class="big">ascend</div><span class="tag">Wordmark, headings, buttons</span></div>
+      <div class="card"><span class="tag">Body · Inter 400</span><div class="body">Aa Bb</div><span class="tag">Descriptions, docs, UI text</span></div>
+      <div class="card"><span class="tag">Mono · system mono</span><div class="monoeg">PULL_01</div><span class="tag">Labels, versions, status</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sechead"><div><span class="num">06</span><h2>In use</h2></div><p>The After Effects panel and a store listing. One orange button per view, with everything else in neutral greys.</p></div>
+    <div class="use">
+      <div class="panel" role="img" aria-label="Mockup of the Ascend panel inside After Effects">
+        <div class="bar"><span>≡</span><span class="tabname">Ascend</span><span style="margin-left:auto">×</span></div>
+        <div class="body">
+          <div class="brandrow"><img src="ascend-icon.svg" alt="">ascend<small>v0.1</small></div>
+          <div class="btn primary">↓ Pull layers</div>
+          <div class="btn ghost">Import .json…</div>
+          <label style="display:flex;gap:8px;align-items:center;color:#aaa"><span style="width:12px;height:12px;border:1px solid #555;border-radius:2px;display:inline-block"></span>Build into active comp</label>
+          <div class="status"><i></i>CONNECTED · ILLUSTRATOR, PHOTOSHOP, FIGMA</div>
+        </div>
+      </div>
+      <div class="card product">
+        <div class="cover">
+          <div class="lockup"><svg viewBox="0 0 368 268" aria-hidden="true"><use href="#peak"/></svg>ascend</div>
+          <div class="flow"><span class="tag">Ai · Ps · Figma</span><span class="tag x">→ native layers →</span><span class="tag">After Effects</span></div>
+        </div>
+        <div class="txt"><h3>Ascend</h3><p>Push artwork from Illustrator, Photoshop or Figma and pull it into After Effects as live shape, text and image layers. No exports and no rebuilding.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sechead"><div><span class="num">07</span><h2>Voice</h2></div><p>Short, confident, a little dry. Talk about the result (native, editable layers), not the technology.</p></div>
+    <div class="voice">
+      <div class="card"><span class="tag">Tagline</span><q>Design anywhere. <em>Rise</em> in After Effects.</q></div>
+      <div class="card"><span class="tag">One-liner</span><q>Native layers, <em>one click</em>.</q></div>
+      <div class="card"><span class="tag">Short</span><q>Lift your layers.</q></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sechead"><div><span class="num">08</span><h2>Don't</h2></div><p>The mark only works when it stays simple.</p></div>
+    <div class="rules">
+      <div class="card"><div class="stage on-ink"><svg viewBox="0 0 368 268" style="transform:scaleX(1.5)"><use href="#peak"/></svg></div><div class="meta"><span class="tag"><span class="x">×</span> Stretch</span></div></div>
+      <div class="card"><div class="stage on-ink"><svg viewBox="0 0 368 268" style="--pk:#ff5a1f;--ch:#3b82f6"><use href="#peak"/></svg></div><div class="meta"><span class="tag"><span class="x">×</span> Recolour</span></div></div>
+      <div class="card"><div class="stage on-ink"><svg viewBox="0 0 368 268" style="transform:rotate(180deg)"><use href="#peak"/></svg></div><div class="meta"><span class="tag"><span class="x">×</span> Rotate</span></div></div>
+      <div class="card"><div class="stage" style="background:#5c5a55"><svg viewBox="0 0 368 268"><use href="#peak"/></svg></div><div class="meta"><span class="tag"><span class="x">×</span> Low contrast</span></div></div>
+    </div>
+  </section>
+
+  <footer class="tag">
+    <span>Files: <a href="ascend-mark.svg">mark</a> · <a href="ascend-mark-dark.svg">mark dark</a> · <a href="ascend-mark-mono.svg">mono</a> · <a href="ascend-icon.svg">icon</a> · <a href="ascend-icon-small.svg">icon small</a> · <a href="ascend-lockup.svg">lockup</a></span>
+    <span>Ascend × hamkobarezz.com</span>
+  </footer>
+</div>
+</body>
+</html>

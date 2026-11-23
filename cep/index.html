@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ascend</title>
+<style>
+  /* Same system as the Ascend app: dark ground, off-white type, orange only for the one thing to do next */
+  :root {
+    --ink: #0d0d0f; --tile: #141417; --hover: #1a1a1e; --line: #2a2925; --mute: #8d897d; --paper: #efead8; --accent: #ff5a1f; --ok: #46c46a;
+    --display: "Inter Tight", "Segoe UI Variable Display", "Segoe UI", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --body: "Inter", "Segoe UI Variable Text", "Segoe UI", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", Menlo, Consolas, monospace;
+    --ease: cubic-bezier(.16, 1, .3, 1);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { background: var(--ink); color: var(--paper); font: 12.5px/1.45 var(--body); -webkit-font-smoothing: antialiased; user-select: none; display: flex; flex-direction: column; overflow: hidden; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  button:disabled { cursor: default; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .k { font: 10px/1.4 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--mute); }
+  [hidden] { display: none !important; }
+
+  header { display: flex; align-items: center; gap: 8px; padding: 14px 16px 0; flex: none; }
+  .mark { width: 22px; height: 16px; flex: none; }
+  .logo { font: 700 17px/1 var(--display); letter-spacing: -.05em; }
+  .live { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; }
+  .live i { width: 6px; height: 6px; border-radius: 50%; background: var(--mute); }
+  .live.on i { background: var(--ok); }
+  .live.off { color: var(--accent); }
+  .live.off i { background: var(--accent); }
+
+  main { flex: 1; overflow-y: auto; padding: 18px 16px 16px; }
+  main::-webkit-scrollbar { width: 4px; }
+  main::-webkit-scrollbar-thumb { background: var(--line); }
+  .in { animation: up .5s var(--ease) both; animation-delay: calc(var(--d, 0) * 60ms); }
+  @keyframes up { from { opacity: 0; transform: translateY(6px); } }
+
+  .step { font: 10px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+  .step.quiet { color: var(--mute); }
+
+  /* what's waiting / what will be sent */
+  .card { display: flex; align-items: center; gap: 12px; margin-top: 10px; padding: 12px; background: var(--tile); border: 1px solid var(--line); min-height: 62px; }
+  .card.empty { background: transparent; border-style: dashed; }
+  .ico { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 8px; font: 700 13px var(--display); letter-spacing: -.02em; flex: none; }
+  .ico.ae { background: #00005b; color: #9999ff; }
+  .ico.ai { background: #330000; color: #ff9a00; }
+  .ico.ps { background: #001e36; color: #31a8ff; }
+  .ico.fg { background: #1e1e1e; color: #efead8; border: 1px solid #333; }
+  .ico.none { background: transparent; border: 1px dashed var(--line); color: var(--mute); }
+  .card .t { min-width: 0; flex: 1; }
+  .card b { display: block; font: 600 14px/1.25 var(--display); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card small { display: block; font-size: 11.5px; color: var(--mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .cta { display: flex; align-items: center; justify-content: space-between; width: 100%; height: 44px; margin-top: 12px; padding: 0 16px; border: 0; background: var(--accent); color: var(--ink); font: 700 14px var(--display); letter-spacing: -.01em; transition: background .2s; }
+  .cta:hover:not(:disabled) { background: var(--paper); }
+  .cta .arr { transition: transform .25s var(--ease); }
+  .cta:hover:not(:disabled) .arr { transform: translateX(4px); }
+  .cta:disabled { background: var(--tile); color: var(--mute); }
+  .cta.busy { color: var(--paper); cursor: progress; }
+  .cta.busy .arr { visibility: hidden; }
+  .ghost { width: 100%; height: 36px; margin-top: 8px; border: 1px solid var(--line); background: transparent; font: 600 12.5px var(--display); transition: border-color .2s; }
+  .ghost:hover:not(:disabled) { border-color: var(--paper); }
+  .ghost:disabled { color: var(--mute); }
+
+  .opts { margin-top: 22px; }
+  .opts .k { padding-bottom: 6px; }
+  .opt { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 8px 0; border: 0; border-top: 1px solid var(--line); background: none; text-align: left; }
+  .opt:last-child { border-bottom: 1px solid var(--line); }
+  .opt .t { flex: 1; min-width: 0; }
+  .opt b { display: block; font: 600 13px/1.25 var(--display); }
+  .opt small { display: block; font-size: 11px; color: var(--mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .opt:disabled b { color: var(--mute); }
+  .switch { position: relative; width: 28px; height: 16px; border: 1px solid var(--mute); flex: none; transition: background .2s, border-color .2s; }
+  .switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 8px; height: 8px; background: var(--mute); transition: transform .25s var(--ease), background .2s; }
+  .opt.on .switch { background: var(--accent); border-color: var(--accent); }
+  .opt.on .switch::after { transform: translateX(12px); background: var(--ink); }
+  .seg { display: flex; flex: none; }
+  .seg button { width: 30px; height: 24px; margin-left: -1px; border: 1px solid var(--line); background: transparent; font: 10px var(--mono); color: var(--mute); }
+  .seg button.on { background: var(--paper); border-color: var(--paper); color: var(--ink); }
+
+  .dots::after { content: ""; animation: dots 1.2s steps(4) infinite; }
+  @keyframes dots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
+
+  /* result message */
+  .toast { flex: none; display: flex; gap: 10px; padding: 11px 16px; background: var(--paper); color: var(--ink); font-size: 12px; }
+  .toast.err { background: var(--accent); }
+  .toast span { flex: 1; }
+  .toast button { border: 0; background: none; padding: 0; align-self: start; font: 16px/1 var(--body); color: var(--ink); }
+  .toast.show { animation: rise .35s var(--ease); }
+  @keyframes rise { from { transform: translateY(100%); } }
+
+  footer { flex: none; display: flex; justify-content: space-between; padding: 10px 16px; border-top: 1px solid var(--line); }
+
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<header>
+  <svg class="mark" viewBox="0 0 368 268" aria-hidden="true"><path d="M0 268 L132 80 L196 164 L264 52 L368 268 Z" fill="#efead8" /><circle cx="56" cy="28" r="28" fill="#ff5a1f" /></svg>
+  <span class="logo">ascend</span>
+  <span class="live k" id="live"><i></i><span id="liveText">…</span></span>
+</header>
+
+<main>
+  <!-- After Effects: pull what's waiting -->
+  <section id="ae" hidden>
+    <div class="step in" id="aeStep">Waiting in Ascend</div>
+    <div class="card in" id="aeCard" style="--d:1">
+      <div class="ico none" id="aeIco">—</div>
+      <div class="t"><b id="aeName">Checking…</b><small id="aeMeta">&nbsp;</small></div>
+    </div>
+    <button class="cta in" id="pull" style="--d:2" disabled><span id="pullText">Pull into After Effects</span><span class="arr">→</span></button>
+
+    <div class="opts in" style="--d:3">
+      <div class="k">Options</div>
+      <button class="opt" id="optActive" role="switch" aria-checked="false"><span class="t"><b>Into the open comp</b><small id="optActiveSub">Otherwise makes a new comp</small></span><span class="switch"></span></button>
+      <button class="opt on" id="optGroups" role="switch" aria-checked="true"><span class="t"><b>Groups as null layers</b><small>Keeps the layer hierarchy</small></span><span class="switch"></span></button>
+    </div>
+  </section>
+
+  <!-- Illustrator: send the artboard -->
+  <section id="ai" hidden>
+    <div class="step in" id="aiStep">Artboard</div>
+    <div class="card in" id="aiCard" style="--d:1">
+      <div class="ico ai">Ai</div>
+      <div class="t"><b id="aiName">Checking…</b><small id="aiMeta">&nbsp;</small></div>
+    </div>
+    <button class="cta in" id="send" style="--d:2" disabled><span id="sendText">Send to After Effects</span><span class="arr">→</span></button>
+    <button class="ghost in" id="comps" style="--d:3" disabled>Make comp</button>
+
+    <div class="opts in" style="--d:4">
+      <div class="k">Options</div>
+      <button class="opt" id="optSel" role="switch" aria-checked="false"><span class="t"><b>Selected objects only</b><small id="optSelSub">Select something first</small></span><span class="switch"></span></button>
+      <button class="opt" id="optFlat" role="switch" aria-checked="false"><span class="t"><b>Flatten everything</b><small>Every object becomes a PNG</small></span><span class="switch"></span></button>
+      <div class="opt" style="cursor:default"><span class="t"><b>PNG scale</b><small>For gradients, effects, images</small></span>
+        <span class="seg" id="scale"><button data-v="1">1x</button><button data-v="2" class="on">2x</button><button data-v="3">3x</button><button data-v="4">4x</button></span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden><span id="toastText"></span><button id="toastX" aria-label="Dismiss">×</button></div>
+
+<footer class="k"><span id="hint">Ascend</span><span id="ver"></span></footer>
+
+<script src="panel.js"></script>
+</body>
+</html>

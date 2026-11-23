@@ -1,0 +1,23 @@
+{
+  "manifestVersion": 5,
+  "id": "com.hamkobarezz.hbbridge",
+  "name": "Ascend",
+  "version": "0.3.0",
+  "main": "index.html",
+  "host": { "app": "PS", "minVersion": "23.3.0" },
+  "entrypoints": [
+    {
+      "type": "panel",
+      "id": "hbBridgePanel",
+      "label": { "default": "Ascend" },
+      "minimumSize": { "width": 240, "height": 360 },
+      "maximumSize": { "width": 2000, "height": 2000 },
+      "preferredDockedSize": { "width": 280, "height": 520 },
+      "preferredFloatingSize": { "width": 300, "height": 540 }
+    }
+  ],
+  "requiredPermissions": {
+    "network": { "domains": ["http://localhost:7777", "http://127.0.0.1:7777"] },
+    "localFileSystem": "request"
+  }
+}
