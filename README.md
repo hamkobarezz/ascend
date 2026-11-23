@@ -1,9 +1,9 @@
 # Ascend: Figma · Photoshop · Illustrator → After Effects
 
-One app. Install it, click **Install** next to each Adobe app, and from then on: **Send** in your design app, **Pull** in After Effects. Layers arrive at the same size and position, as editable AE layers. The look follows hamkobarezz.com: ink `#0d0d0f`, off-white `#efead8`, orange `#ff5a1f`, Inter Tight.
+One app. Install it, click **Install** next to each Adobe app, and from then on: click **Send** in your design app and Ascend switches to After Effects and builds it there. Layers arrive at the same size and position, as editable AE layers. The look follows hamkobarezz.com: ink `#0d0d0f`, off-white `#efead8`, orange `#ff5a1f`, Inter Tight.
 
 ```
-Figma / Photoshop / Illustrator ──Send──▶  Ascend app (tray / menu bar)  ◀──Pull── After Effects
+Figma / Photoshop / Illustrator ──Send──▶  Ascend app (tray / menu bar)  ──▶ After Effects (builds it automatically)
 ```
 
 ## Install (for users)
@@ -15,7 +15,7 @@ Figma / Photoshop / Illustrator ──Send──▶  Ascend app (tray / menu bar
    - **Illustrator:** the same signed extension. Open it from **Window → Extensions → Ascend**.
    - **Photoshop:** installed through Creative Cloud. Open it from **Plugins → Ascend**.
    - **Figma:** Figma doesn't let other apps install plugins. Click **Set up**: the app shows the plugin's `manifest.json`. In Figma, go to *Plugins → Development → Import plugin from manifest…* and pick it. You only do this once.
-4. Done. The plugins find the app on their own, with no address or server to set up. Each panel shows **APP ONLINE** while the app is running. When the app updates, it refreshes the installed plugins too.
+4. Done. The plugins find the app on their own, with no address or server to set up. Each panel shows a ✓ while the app is running. Keep the Ascend panel open in After Effects: with **Auto-pull** on (the default), every Send is built there straight away. When the app updates, it refreshes the installed plugins too.
 
 ## What stays editable
 
@@ -23,14 +23,14 @@ Figma / Photoshop / Illustrator ──Send──▶  Ascend app (tray / menu bar
 |---|---|
 | Rectangles, rounded rectangles, ellipses (Figma native; Photoshop/Illustrator paths that are really one of these shapes) | Shape layer with a **parametric** Rectangle/Ellipse, so size and roundness stay live |
 | Any other vector: paths, compound paths, booleans, Photoshop shape layers | Shape layer with **bezier paths** |
-| Solid fills and strokes | Shape Fill / Stroke |
+| Solid fills and strokes (several per shape), dashes, caps, joins, inside/outside alignment | Shape Fill / Stroke with native **Dashes**; inside/outside strokes use **Offset Paths**, so the shape stays editable |
 | Text | **Live text**: font, size, color, tracking, leading, alignment, rotation; mixed styles on AE 24.3+ |
-| Groups, frames, layers | **Null layers** with children parented |
+| Groups, frames, layers with 2+ items | **Null layers** with children parented (single objects get no null) |
 | Figma masks, Photoshop clipping masks, Illustrator clipping groups | **Track mattes** |
 | Opacity, blend modes, rotation, flips, names, stacking order | The same on the AE layer |
 | Gradients, images, smart objects, pixel layers, layer styles (when set to Flatten), layer masks | Trimmed PNG at the exact spot, saved in `./Ascend` next to the `.aep` |
 
-**Make comp** (Photoshop, Illustrator): sends only artboard sizes. Pull then creates one empty AE comp per artboard (or one for the Photoshop canvas), with the same name and pixel size.
+**Make comp** (Photoshop, Illustrator): sends only artboard sizes. After Effects then creates one empty comp per artboard (or one for the Photoshop canvas), with the same name and pixel size.
 
 ## Build the installers (for you)
 
@@ -51,9 +51,9 @@ To try it without installing, run `npm start`. Plugin source folders: `cep/` (Af
 **App signing:** the app installers are unsigned. Windows SmartScreen will show "More info → Run anyway" on first install. On Mac, the first launch needs right-click → **Open**. To remove those warnings you need a code-signing certificate (Windows) and an Apple Developer ID with notarization (Mac). electron-builder picks both up from environment variables.
 
 ## Known limits
-- Gradients are flattened to PNG. AE scripting can't write gradient stops.
-- Dashed strokes come through solid. Only the top stroke transfers. Inside/outside stroke on free-form paths is drawn centered.
-- Photoshop adjustment layers aren't transferred. Illustrator live effects aren't visible to scripts.
-- Only one mask per layer (an AE limit). Nested masks are flattened.
-- Port 7777 is fixed. If something else is using it, the app says so in its status card.
-- Not yet tested inside the real Adobe apps or Figma. Offline tests cover the geometry, units, relay, installers and the AE preference patch.
+- **Gradients** arrive as PNGs. After Effects scripting can't set gradient colors (Adobe lists it as a missing feature), so live gradients need a template-based workaround that's still in progress.
+- **Nested masks** (a mask inside an already-masked group) are flattened to a PNG. Single masks and clipping groups become track mattes.
+- **Dashes:** After Effects allows 3 dash/gap pairs; longer patterns keep the first 3.
+- **Photoshop adjustment layers** aren't transferred yet. **Illustrator live effects** (drop shadows, warps…) aren't readable by scripts, so those objects are flattened to PNG.
+- **Port:** the app uses the first free port from 7777 to 7781; every plugin finds it on its own.
+- **Code signing:** the app installers aren't signed by Microsoft/Apple yet, so first launch shows a warning (see the release notes).
