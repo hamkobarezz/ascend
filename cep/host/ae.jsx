@@ -537,11 +537,40 @@
                 m.enabled = !L.matteSource;
             }
 
-            // Groups -> null layers, parented so the hierarchy survives.
+            // Groups -> null layers, parented so the hierarchy survives. Only groups that really group
+            // something (2+ members after skipping one-item groups) get a null, so a single object, or
+            // Illustrator's own "Layer 1" wrapper around one group, doesn't add an empty null.
             if (opts.groups && data.groups instanceof Array && data.groups.length) {
-                var nulls = {}, g;
+                var nulls = {}, g, byId = {}, kids = {}, eff = {}, keep = {};
+                for (i = 0; i < data.groups.length; i++) { byId[data.groups[i].id] = data.groups[i]; kids[data.groups[i].id] = []; }
+                for (i = 0; i < data.layers.length; i++) {
+                    L = data.layers[i];
+                    if (built[L.id] && L.parent !== undefined && kids[L.parent]) kids[L.parent].push(null);
+                }
+                for (i = 0; i < data.groups.length; i++) {
+                    g = data.groups[i];
+                    if (g.parent !== undefined && kids[g.parent]) kids[g.parent].push(g.id);
+                }
+                // Members a group ends up with: a layer counts 1, a kept sub-group counts 1, a skipped
+                // sub-group passes its own members (0 or 1) up.
+                var members = function (id) {
+                    if (eff[id] !== undefined) return eff[id];
+                    eff[id] = 0;
+                    var n = 0, list = kids[id];
+                    for (var m = 0; m < list.length; m++) {
+                        if (list[m] === null) n++;
+                        else { var c = members(list[m]); n += c >= 2 ? 1 : c; }
+                    }
+                    return (eff[id] = n);
+                };
+                for (i = 0; i < data.groups.length; i++) keep[data.groups[i].id] = members(data.groups[i].id) >= 2;
+                var keptParent = function (id) {
+                    while (id !== undefined && byId[id] && !keep[id]) id = byId[id].parent;
+                    return id !== undefined && keep[id] ? id : undefined;
+                };
                 for (i = data.groups.length - 1; i >= 0; i--) {
                     g = data.groups[i];
+                    if (!keep[g.id]) continue;
                     var nl = comp.layers.addNull();
                     nl.name = g.name || "Group";
                     nl.transform.position.setValue([g.x, g.y]);
@@ -551,11 +580,13 @@
                 }
                 for (i = 0; i < data.groups.length; i++) {
                     g = data.groups[i];
-                    if (g.parent !== undefined && nulls[g.parent]) nulls[g.id].parent = nulls[g.parent];
+                    var gp = keptParent(g.parent);
+                    if (nulls[g.id] && gp !== undefined && nulls[gp]) nulls[g.id].parent = nulls[gp];
                 }
                 for (i = 0; i < data.layers.length; i++) {
                     L = data.layers[i];
-                    if (built[L.id] && L.parent !== undefined && nulls[L.parent]) built[L.id].parent = nulls[L.parent];
+                    var lp = keptParent(L.parent);
+                    if (built[L.id] && lp !== undefined && nulls[lp]) built[L.id].parent = nulls[lp];
                 }
             }
         } finally {

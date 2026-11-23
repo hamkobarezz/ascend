@@ -93,8 +93,8 @@
   function setLive(ok) {
     online = ok;
     $('live').className = 'live k ' + (ok ? 'on' : 'off');
-    $('liveText').textContent = ok ? 'Live' : 'Open Ascend';
-    $('live').title = ok ? 'Connected to the Ascend app' : OFFLINE;
+    $('liveText').textContent = ok ? '' : 'Open Ascend';
+    $('live').title = ok ? 'Connected to Ascend' : OFFLINE;
   }
   async function pollRelay() {
     try {

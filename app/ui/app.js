@@ -56,7 +56,7 @@
     const r = state.relay;
     const live = $('live');
     live.className = 'live k ' + (r.running ? 'on' : 'off');
-    $('liveText').textContent = r.running ? 'Live' : 'Offline';
+    $('liveText').textContent = r.running ? '' : 'Offline';
     live.title = r.running ? 'Plugins connect on localhost:' + r.port : r.error || '';
 
     const cta = $('cta');

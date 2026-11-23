@@ -43,11 +43,13 @@
   .mark { width: 25px; height: 18px; flex: none; }
   .logo { font: 700 19px/1 var(--display); letter-spacing: -.05em; }
   .bar .sp { flex: 1; }
-  .live { display: inline-flex; align-items: center; gap: 6px; margin-right: 8px; }
-  .live i { width: 6px; height: 6px; border-radius: 50%; background: var(--mute); }
-  .live.on i { background: var(--ok); }
+  /* Running: just a check. Stopped: says so. */
+  .live { display: inline-flex; align-items: center; margin-right: 8px; }
+  .live svg { display: none; width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+  .live.on { color: var(--paper); }
+  .live.on svg { display: block; }
+  .live.on span { display: none; }
   .live.off { color: var(--accent); }
-  .live.off i { background: var(--accent); }
   .win { -webkit-app-region: no-drag; width: 32px; height: 32px; display: grid; place-items: center; border: 0; background: none; color: var(--mute); cursor: pointer; }
   .win:hover { color: var(--paper); }
   .win.close:hover { color: var(--accent); }
@@ -156,7 +158,7 @@
   <svg class="mark" viewBox="0 0 368 268" aria-hidden="true"><path d="M0 268 L132 80 L196 164 L264 52 L368 268 Z" fill="#efead8" /><circle cx="56" cy="28" r="28" fill="#ff5a1f" /></svg>
   <div class="logo">ascend</div>
   <div class="sp"></div>
-  <span class="live k" id="live" title=""><i></i><span id="liveText">Starting</span></span>
+  <span class="live k" id="live" title=""><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg><span id="liveText">Starting</span></span>
   <button class="win" id="min" title="Minimize" aria-label="Minimize"><svg class="i"><use href="#i-min" /></svg></button>
   <button class="win close" id="close" title="Close to tray" aria-label="Close to tray"><svg class="i"><use href="#i-x" /></svg></button>
 </div>

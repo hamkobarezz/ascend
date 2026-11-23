@@ -25,11 +25,13 @@
   header { display: flex; align-items: center; gap: 8px; padding: 14px 16px 0; flex: none; }
   .mark { width: 22px; height: 16px; flex: none; }
   .logo { font: 700 17px/1 var(--display); letter-spacing: -.05em; }
-  .live { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; }
-  .live i { width: 6px; height: 6px; border-radius: 50%; background: var(--mute); }
-  .live.on i { background: var(--ok); }
+  /* Connected: just a check. Not connected: says what to do. */
+  .live { margin-left: auto; display: inline-flex; align-items: center; }
+  .live svg { display: none; width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+  .live.on { color: var(--paper); }
+  .live.on svg { display: block; }
+  .live.on span { display: none; }
   .live.off { color: var(--accent); }
-  .live.off i { background: var(--accent); }
 
   main { flex: 1; overflow-y: auto; padding: 18px 16px 16px; }
   main::-webkit-scrollbar { width: 4px; }
@@ -100,7 +102,7 @@
 <header>
   <svg class="mark" viewBox="0 0 368 268" aria-hidden="true"><path d="M0 268 L132 80 L196 164 L264 52 L368 268 Z" fill="#efead8" /><circle cx="56" cy="28" r="28" fill="#ff5a1f" /></svg>
   <span class="logo">ascend</span>
-  <span class="live k" id="live"><i></i><span id="liveText">…</span></span>
+  <span class="live k" id="live"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg><span id="liveText">…</span></span>
 </header>
 
 <main>
