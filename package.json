@@ -13,8 +13,8 @@
     "relay": "node relay/server.js",
     "assets": "node scripts/make-icons.js && node scripts/build-ccx.js && node scripts/build-zxp.js",
     "splash": "electron scripts/make-installer-splash.js",
-    "dist:win": "npm run assets && electron-builder --win",
-    "dist:mac": "npm run assets && electron-builder --mac"
+    "dist:win": "npm run assets && electron-builder --win --publish never",
+    "dist:mac": "npm run assets && electron-builder --mac --publish never"
   },
   "devDependencies": {
     "electron": "^45.4.1",
