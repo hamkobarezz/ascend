@@ -59,3 +59,36 @@ jobs:
         with:
           name: Ascend-${{ matrix.os }}
           path: ${{ matrix.files }}
+
+  # A version tag (v0.3.0, ...) publishes both installers as a GitHub Release.
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: out
+          merge-multiple: true
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ls -la out
+          cat > notes.md <<'NOTES'
+          Send layers from **Illustrator, Photoshop and Figma** to **After Effects** as native, editable layers.
+
+          ### Download
+          - **Windows:** `Ascend-Setup-*.exe`
+          - **macOS** (Apple silicon + Intel): `Ascend-*.dmg`
+
+          ### Install
+          1. Run the installer. Ascend opens and lives in the tray / menu bar.
+          2. Click **Install plugins** in the app.
+          3. Restart your Adobe apps, then open Ascend from **Window → Extensions → Ascend** (After Effects, Illustrator) or **Plugins → Ascend** (Photoshop). For Figma, click **Set up** and import the plugin once.
+
+          The app isn't code-signed yet: on Windows choose **More info → Run anyway**, on macOS right-click the app and choose **Open** the first time.
+          NOTES
+          gh release create "$GITHUB_REF_NAME" out/* --repo "$GITHUB_REPOSITORY" --title "Ascend ${GITHUB_REF_NAME#v}" --notes-file notes.md
